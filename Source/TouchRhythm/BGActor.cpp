@@ -9,7 +9,7 @@
 ABGActor::ABGActor()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	BGSprite = CreateDefaultSubobject<UPaperSpriteComponent>(TEXT("BGSprite"));
 	SetRootComponent(BGSprite);
@@ -27,32 +27,20 @@ void ABGActor::BeginPlay()
 	{
 
 		MatInst = BGSprite->CreateDynamicMaterialInstance(0, Mat);
-		
+		MatInst->SetScalarParameterValue(TEXT("Phase"), 0.0f);
+
 		MatInst->SetVectorParameterValue(TEXT("colorA"), FVector(1.0f, 0.102431, 0.03648));
+		MatInst->SetVectorParameterValue(TEXT("colorB"), FVector(0.0f, 0.0320433f, 1.0f));
 	}
 }
 
-// Called every frame
-void ABGActor::Tick(float DeltaTime)
+void ABGActor::SetBGColor(FVector InColorA, FVector InColorB)
 {
-	Super::Tick(DeltaTime);
-
-	if (calc)
-	{
-		phase += DeltaTime;
-
-	}
-	else
-	{
-		phase -= DeltaTime;
-
-	}
-
-	MatInst->SetScalarParameterValue(TEXT("Phase"), phase);
-
-	if (phase > 1.0f || phase < 0.0f)
-	{
-		calc = !calc;
-	}
+	MatInst->SetVectorParameterValue(TEXT("colorA"), InColorA);
+	MatInst->SetVectorParameterValue(TEXT("colorB"), InColorB);
 }
 
+void ABGActor::SetPhase(const float InPhase)
+{
+	MatInst->SetScalarParameterValue(TEXT("Phase"), InPhase);
+}

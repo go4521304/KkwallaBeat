@@ -15,7 +15,7 @@
  class UNiagaraSystem;
 
 
- class AKkwalla;
+ class ANoteManager;
 
 UCLASS()
 class TOUCHRHYTHM_API ATestTouchPlayerController : public APlayerController
@@ -44,9 +44,8 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	UNiagaraSystem* TouchParticle;
 
-	UPROPERTY(EditDefaultsOnly)
-	AKkwalla* testActor;
+	UPROPERTY()
+	ANoteManager* NoteManager;
 
 	bool bIsTouch;
-	
 };

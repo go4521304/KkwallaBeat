@@ -11,7 +11,7 @@
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
 
-#include "Kkwalla.h"
+#include "NoteManager.h"
 #include "EngineUtils.h"
 
 ATestTouchPlayerController::ATestTouchPlayerController()
@@ -65,6 +65,15 @@ void ATestTouchPlayerController::BeginPlay()
 		TouchParticle = TouchParticlePtr.LoadSynchronous();
 	}
 
+	for (ANoteManager* Iter : TActorRange<ANoteManager>(GetWorld()))
+	{
+		if (IsValid(Iter))
+		{
+			NoteManager = Iter;
+			break;
+		}
+	}
+
 	SetShowMouseCursor(true);
 }
 
@@ -87,10 +96,7 @@ void ATestTouchPlayerController::OnClickedTriggered()
 
 	//UE_LOG(LogTemp, Error, TEXT("%f, %f, %f"), HitPos.X, HitPos.Y, HitPos.Z);
 
-	for (AKkwalla* iter : TActorRange<AKkwalla>(GetWorld()))
-	{
-		iter->PointCheck({HitPos.X, HitPos.Y});
-	}
+	NoteManager->TouchInput(FVector2D(HitPos));
 }
 
 void ATestTouchPlayerController::OnTouchTriggered()

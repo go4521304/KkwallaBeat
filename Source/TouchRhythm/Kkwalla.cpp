@@ -13,13 +13,84 @@ AKkwalla::AKkwalla()
 
 	Chara = CreateDefaultSubobject<UPaperSpriteComponent>(TEXT("Kkwalla"));
 	
+	static ConstructorHelpers::FObjectFinder<UPaperSprite> CharaSprite0(TEXT("/Script/Paper2D.PaperSprite'/Game/Img/Sprite/A_1_Sprite.A_1_Sprite'"));
+	static ConstructorHelpers::FObjectFinder<UPaperSprite> CharaSprite1(TEXT("/Script/Paper2D.PaperSprite'/Game/Img/Sprite/A_2_Sprite.A_2_Sprite'"));
+	static ConstructorHelpers::FObjectFinder<UPaperSprite> CharaSprite2(TEXT("/Script/Paper2D.PaperSprite'/Game/Img/Sprite/B_1_Sprite.B_1_Sprite'"));
+	static ConstructorHelpers::FObjectFinder<UPaperSprite> CharaSprite3(TEXT("/Script/Paper2D.PaperSprite'/Game/Img/Sprite/B_2_Sprite.B_2_Sprite'"));
+	static ConstructorHelpers::FObjectFinder<UPaperSprite> CharaSprite4(TEXT("/Script/Paper2D.PaperSprite'/Game/Img/Sprite/C_Sprite.C_Sprite'"));
+	static ConstructorHelpers::FObjectFinder<UPaperSprite> CharaSprite5(TEXT("/Script/Paper2D.PaperSprite'/Game/Img/Sprite/D_Faild_Sprite.D_Faild_Sprite'"));
+
+	if (CharaSprite0.Succeeded())
+	{
+		CharaSprite.Add(CharaSprite0.Object);
+	}
+	if (CharaSprite1.Succeeded())
+	{
+		CharaSprite.Add(CharaSprite1.Object);
+	}
+	if (CharaSprite2.Succeeded())
+	{
+		CharaSprite.Add(CharaSprite2.Object);
+	}
+	if (CharaSprite3.Succeeded())
+	{
+		CharaSprite.Add(CharaSprite3.Object);
+	}
+	if (CharaSprite4.Succeeded())
+	{
+		CharaSprite.Add(CharaSprite4.Object);
+	}
+	if (CharaSprite5.Succeeded())
+	{
+		CharaSprite.Add(CharaSprite5.Object);
+	}
+
+	CharaState = EKkwallaState::Idle;
 }
 
 // Called when the game starts or when spawned
 void AKkwalla::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	CurSpriteIndex = 0;
+	Chara->SetSprite(CharaSprite[CurSpriteIndex]);
+}
+
+void AKkwalla::Update()
+{
+	switch (CharaState)
+	{
+		case EKkwallaState::Idle:
+		{
+			Chara->SetSprite(CharaSprite[CurSpriteIndex]);
+			CurSpriteIndex++;
+			CurSpriteIndex %= 2;
+		}
+		break;
+
+		case EKkwallaState::Fill:
+		{
+			BeerSuccess();
+		}
+
+		case EKkwallaState::Ready:
+		break;
+
+		case EKkwallaState::Success:
+		break;
+
+		case EKkwallaState::Fail:
+		break;
+	default:
+		break;
+	}
+}
+
+void AKkwalla::Reset()
+{
+	CurSpriteIndex = 0;
+	Chara->SetSprite(CharaSprite[CurSpriteIndex]);
+	CharaState = EKkwallaState::Idle;
 }
 
 bool AKkwalla::PointCheck(FVector2D InPos)
@@ -38,31 +109,31 @@ bool AKkwalla::PointCheck(FVector2D InPos)
 
 	if (ActorBox.IsInside(InPos))
 	{
-		BeerSuccess();
 		return true;
 	}
 	return false;
 }
 
-//// Called every frame
-//void AKkwalla::Tick(float DeltaTime)
-//{
-//	Super::Tick(DeltaTime);
-//
-//}
-
 void AKkwalla::BeerReady()
 {
+	Chara->SetSprite(CharaSprite[2]);
+	CharaState = EKkwallaState::Ready;
+}
+
+void AKkwalla::BeerFill()
+{
+	Chara->SetSprite(CharaSprite[3]);
+	CharaState = EKkwallaState::Fill;
 }
 
 void AKkwalla::BeerSuccess()
 {
-	UE_LOG(LogTemp, Error, TEXT("Success"));
-
+	Chara->SetSprite(CharaSprite[4]);
+	CharaState = EKkwallaState::Success;
 }
 
 void AKkwalla::BeerFail()
 {
-	UE_LOG(LogTemp, Error, TEXT("Fail"));
-
+	Chara->SetSprite(CharaSprite[5]);
+	CharaState = EKkwallaState::Fail;
 }

@@ -6,7 +6,15 @@
 #include "GameFramework/Actor.h"
 #include "NoteManager.generated.h"
 
+class ABGActor;
 class AKkwalla;
+class UFMODEvent;
+
+UENUM()
+enum class ManagerState
+{
+	PreBeat, Start,
+};
 
 UCLASS()
 class TOUCHRHYTHM_API ANoteManager : public AActor
@@ -28,11 +36,40 @@ public:
 	void TouchInput(const FVector2D& InPos);
 
 private:
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY()
+	class UFMODAudioComponent* AudioComponent;
+	
+	UPROPERTY(EditAnywhere, Category = "Manager")
+	ABGActor* BgActor;
+
+	UPROPERTY(EditAnywhere, Category = "Manager")
 	TArray<AKkwalla*> Kkwallas;
 
-	int32 TimeSec;
+	UPROPERTY(EditAnywhere, Category = "Manager")
+	int32 BPM;
+
+	UPROPERTY(EditAnywhere, Category = "Manager")
+	int32 GradeCheck;
+
+	UPROPERTY(EditAnywhere, Category = "Manager")
+	UFMODEvent* BGMusic;
+
+	UPROPERTY(EditAnywhere, Category = "Manager")
+	int32 BGMBias;
+
+	UPROPERTY(EditAnywhere, Category = "Manager")
+	int32 PreBeatCount;
+
+	int32 BPMTimeMs;
+	int32 BeatCount;
+
+	int32 CurTimeSec;
 
 	bool bAnyKeyDown;
 	int32 OnKeyDownTime;
+	FVector2D CachePos;
+
+	bool bProcessed;
+
+	ManagerState GameState;
 };
