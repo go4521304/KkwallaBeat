@@ -29,8 +29,8 @@ void ABGActor::BeginPlay()
 		MatInst = BGSprite->CreateDynamicMaterialInstance(0, Mat);
 		MatInst->SetScalarParameterValue(TEXT("Phase"), 0.0f);
 
-		MatInst->SetVectorParameterValue(TEXT("colorA"), FVector(1.0f, 0.102431, 0.03648));
-		MatInst->SetVectorParameterValue(TEXT("colorB"), FVector(0.0f, 0.0320433f, 1.0f));
+		MatInst->SetVectorParameterValue(TEXT("colorA"), FVector(0.99215f, 0.45882f, 0.43921f));
+		MatInst->SetVectorParameterValue(TEXT("colorB"), FVector(1.0f, 1.0f, 1.0f));
 	}
 }
 

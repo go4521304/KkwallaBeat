@@ -108,7 +108,6 @@ void ANoteManager::Tick(float DeltaTime)
 				UE_LOG(LogTemp, Error, TEXT("MakeTurn"));
 				GameState = ManagerState::MakeTurn;
 				HudWidget->ChangeBreakWidgetVisibility(false);
-				HudWidget->ShowFailePage(false);
 				AudioComponent->SetParameter(TEXT("Turn"), 0.0f);
 				bAnyKeyDown = false;
 				bProcessed = false;
@@ -377,8 +376,7 @@ void ANoteManager::Tick(float DeltaTime)
 				{
 					UE_LOG(LogTemp, Error, TEXT("PreBeat"));
 					GameState = ManagerState::PreBeat;
-					HudWidget->ChangeBreakWidgetVisibility(false);
-					HudWidget->ShowFailePage(true);
+					HudWidget->ChangeBreakWidgetVisibility(true);
 					AudioComponent->SetParameter(TEXT("Turn"), 0.0f);
 				}
 				else

@@ -9,11 +9,12 @@
 class ABGActor;
 class AKkwalla;
 class UFMODEvent;
+class AKkwallaHUD;
 
 UENUM()
 enum class ManagerState
 {
-	PreBeat, Start,
+	PreBeat, MakeTurn, MakeTurnBreak, PlayTurn, PlayTurnBreak, Fail
 };
 
 UCLASS()
@@ -72,4 +73,13 @@ private:
 	bool bProcessed;
 
 	ManagerState GameState;
+
+	UPROPERTY()
+	TArray<int32> PatternArr;
+	UPROPERTY()
+	TArray<int32> PatternArrCheck;
+	int32 PlayerNum;
+
+	UPROPERTY()
+	AKkwallaHUD* HudWidget;
 };
