@@ -29,7 +29,7 @@ ANoteManager::ANoteManager()
 
 	PreBeatCount = 4;
 
-	bProcessed = false;
+	IsBGMPlay = false;
 
 	AudioComponent = CreateDefaultSubobject<UFMODAudioComponent>(TEXT("AudioComponent"));
 	AudioComponent->SetupAttachment(RootComponent);
@@ -48,7 +48,12 @@ void ANoteManager::BeginPlay()
 	BGMBias = BGMBias * (MS_TIME / 1000);
 	BeatCount = 0;
 	GameState = ManagerState::PreBeat;
-	bProcessed = false;
+	IsBGMPlay = false;
+
+	// 시작할 때 입력을 안받겠음
+	bAnyKeyDown = true;
+	OnKeyDownTime = -1;
+	CachePos = FVector2D::ZeroVector;
 
 	APlayerController* PlayerCon = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	if (IsValid(PlayerCon))
@@ -87,11 +92,11 @@ void ANoteManager::Tick(float DeltaTime)
 
 	if (GameState == ManagerState::PreBeat)
 	{
-		if (bProcessed == false && BGMBias <= 0)
+		if (IsBGMPlay == false && BGMBias <= 0)
 		{
 			AudioComponent->SetParameter(TEXT("Turn"), 1.0f);
 			AudioComponent->Play();
-			bProcessed = true;
+			IsBGMPlay = true;
 		}
 		else
 		{
@@ -100,20 +105,11 @@ void ANoteManager::Tick(float DeltaTime)
 
 		if ((BeatCount * BPMTimeMs) <= CurTimeSec)
 		{
-			PreBeatCount--;
 			BeatCount++;
-
-			if (PreBeatCount < 0)
+			if (PreBeatCount < BeatCount)
 			{
-				UE_LOG(LogTemp, Error, TEXT("MakeTurn"));
-				GameState = ManagerState::MakeTurn;
-				HudWidget->ChangeBreakWidgetVisibility(false);
-				HudWidget->ShowFailePage(false);
-				AudioComponent->SetParameter(TEXT("Turn"), 0.0f);
 				bAnyKeyDown = false;
-				bProcessed = false;
 				OnKeyDownTime = -1;
-				CachePos = FVector2D::ZeroVector;
 				BeatCount = 0;
 				CurTimeSec = 0;
 
@@ -122,6 +118,12 @@ void ANoteManager::Tick(float DeltaTime)
 					PatternArr[Iter] = -1;
 					PatternArrCheck[Iter] = -1;
 				}
+
+				UE_LOG(LogTemp, Error, TEXT("MakeTurn"));
+				GameState = ManagerState::MakeTurn;
+				HudWidget->ChangeBreakWidgetVisibility(false);
+				HudWidget->ShowFailePage(false);
+				AudioComponent->SetParameter(TEXT("Turn"), 0.0f);
 				return;
 			}
 		}
@@ -132,23 +134,16 @@ void ANoteManager::Tick(float DeltaTime)
 		if ((BeatCount * BPMTimeMs) <= CurTimeSec)
 		{
 			UE_LOG(LogTemp, Error, TEXT("BeatCount %d"), CurTimeSec);
-
-			bAnyKeyDown = false;
-			bProcessed = false;
-			OnKeyDownTime = -1;
-			CachePos = FVector2D::ZeroVector;
 			BeatCount++;
 
 			if (BeatCount > 8)
 			{
-				UE_LOG(LogTemp, Error, TEXT("MakeTurnBreak"));
-				GameState = ManagerState::MakeTurnBreak;
-				HudWidget->ChangeBreakWidgetVisibility(true);
 				BeatCount = 0;
 				CurTimeSec = 0;
 				PlayerNum = 5; // 이걸 플레이할 사람 수
-				PreBeatCount = 4;
-				AudioComponent->SetParameter(TEXT("Turn"), 1.0f);
+
+				bAnyKeyDown = true;
+				OnKeyDownTime = -1;
 
 				for (AKkwalla* CharIter : Kkwallas)
 				{
@@ -157,6 +152,11 @@ void ANoteManager::Tick(float DeltaTime)
 						CharIter->Reset();
 					}
 				}
+
+				UE_LOG(LogTemp, Error, TEXT("MakeTurnBreak"));
+				GameState = ManagerState::MakeTurnBreak;
+				AudioComponent->SetParameter(TEXT("Turn"), 1.0f);
+				HudWidget->ChangeBreakWidgetVisibility(true);
 				return;
 			}
 			else
@@ -171,25 +171,39 @@ void ANoteManager::Tick(float DeltaTime)
 			}
 		}
 
-		// 여기서의 BeatCount는 실제 입력을 받을 비트를 의미
-		if (bAnyKeyDown && (bProcessed == false) && BeatCount < 7)
+		if (bAnyKeyDown)
 		{
-			for (int32 Iter = 0; Iter < Kkwallas.Num(); ++Iter)
+			int32 CheckBeatCount = CurTimeSec / BPMTimeMs;
+
+			// 빨리 눌렀을 경우 TestBeatCount가 현재보다 느림
+			if ((CheckBeatCount * BPMTimeMs) + GradeCheck < OnKeyDownTime)
 			{
-				if (IsValid(Kkwallas[Iter]) && Kkwallas[Iter]->PointCheck(CachePos))
+				CheckBeatCount++;
+				UE_LOG(LogTemp, Warning, TEXT("?"));
+
+			}
+			// 늦게 눌렀을 경우 CheckBeatCount가 현재와 맞음
+
+			// 입력할 수 있는 비트일 경우
+			if (CheckBeatCount < 6)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("%d %d"), CheckBeatCount, OnKeyDownTime);
+				if ((CheckBeatCount * BPMTimeMs) - GradeCheck <= OnKeyDownTime && OnKeyDownTime <= (CheckBeatCount * BPMTimeMs) + GradeCheck)
 				{
-					if (((BeatCount - 1) * BPMTimeMs) - GradeCheck <= OnKeyDownTime && OnKeyDownTime <= ((BeatCount - 1) * BPMTimeMs) + GradeCheck)
+					for (int32 Iter = 0; Iter < Kkwallas.Num(); ++Iter)
 					{
-						Kkwallas[Iter]->BeerReady();
-						PatternArr[(BeatCount - 1)] = Iter;
+						if (IsValid(Kkwallas[Iter]) && Kkwallas[Iter]->PointCheck(CachePos))
+						{
+							Kkwallas[Iter]->BeerReady();
+							PatternArr[CheckBeatCount] = Iter;
+							break;
+						}
 					}
-					bAnyKeyDown = false;
-					bProcessed = true;
-					OnKeyDownTime = -1;
-					CachePos = FVector2D::ZeroVector;
-					break;
 				}
 			}
+
+			bAnyKeyDown = false;
+			OnKeyDownTime = -1;
 		}
 	}
 
@@ -197,18 +211,15 @@ void ANoteManager::Tick(float DeltaTime)
 	{
 		if ((BeatCount * BPMTimeMs) <= CurTimeSec)
 		{
-			bAnyKeyDown = false;
-			bProcessed = false;
-			OnKeyDownTime = -1;
-			CachePos = FVector2D::ZeroVector;
 			BeatCount++;
-			PreBeatCount--;
-
-			if (PreBeatCount < 0)
+			if (PreBeatCount < BeatCount)
 			{
 				BeatCount = 0;
 				CurTimeSec = 0;
-				PreBeatCount = 4;
+
+				bAnyKeyDown = false;
+				OnKeyDownTime = -1;
+
 				UE_LOG(LogTemp, Error, TEXT("PlayTurn"));
 				GameState = ManagerState::PlayTurn;
 				AudioComponent->SetParameter(TEXT("Turn"), 0.0f);
@@ -253,45 +264,43 @@ void ANoteManager::Tick(float DeltaTime)
 	{
 		if ((BeatCount * BPMTimeMs) <= CurTimeSec)
 		{
-			bAnyKeyDown = false;
-			bProcessed = false;
-			OnKeyDownTime = -1;
-			CachePos = FVector2D::ZeroVector;
+			UE_LOG(LogTemp, Error, TEXT("BeatCount %d"), CurTimeSec);
 			BeatCount++;
 
 			if (BeatCount > 8)
 			{
 				BeatCount = 0;
 				CurTimeSec = 0;
-				PreBeatCount = 4;
 				PlayerNum--;
-				bool Success = true;
+
+				bAnyKeyDown = true;
+				OnKeyDownTime = -1;
+
+				bool bSuccess = true;
 				for (int32 Iter = 0; Iter < Kkwallas.Num(); ++Iter)
 				{
 					if (PatternArr[Iter] != PatternArrCheck[Iter])
 					{
-						Success = false;
+						bSuccess = false;
 						break;
 					}
 				}
-				if (Success)
+
+				if (bSuccess)
 				{
-					GameState = ManagerState::PlayTurnBreak;
-					HudWidget->ChangeBreakWidgetVisibility(true);
-					AudioComponent->SetParameter(TEXT("Turn"), 1.0f);
-					UE_LOG(LogTemp, Error, TEXT("PlayTurnBreak"));
 					for (int32 Iter = 0; Iter < Kkwallas.Num(); ++Iter)
 					{
 						Kkwallas[Iter]->Reset();
 						PatternArrCheck[Iter] = -1;
 					}
+
+					UE_LOG(LogTemp, Error, TEXT("PlayTurnBreak"));
+					GameState = ManagerState::PlayTurnBreak;
+					AudioComponent->SetParameter(TEXT("Turn"), 1.0f);
+					HudWidget->ChangeBreakWidgetVisibility(true);
 				}
 				else
 				{
-					GameState = ManagerState::Fail;
-					HudWidget->ChangeBreakWidgetVisibility(false);
-					HudWidget->ShowFailePage(true);
-					UE_LOG(LogTemp, Error, TEXT("Fail"));
 					for (AKkwalla* CharIter : Kkwallas)
 					{
 						if (IsValid(CharIter))
@@ -299,6 +308,10 @@ void ANoteManager::Tick(float DeltaTime)
 							CharIter->Reset();
 						}
 					}
+
+					UE_LOG(LogTemp, Error, TEXT("Fail"));
+					GameState = ManagerState::Fail;
+					HudWidget->ShowFailePage(true);
 				}
 				return;
 			}
@@ -306,12 +319,9 @@ void ANoteManager::Tick(float DeltaTime)
 			{
 				for (int32 Iter = 0; Iter < Kkwallas.Num(); ++Iter)
 				{
-					if (PatternArr[Iter] == PatternArrCheck[Iter])
+					if (PatternArr[Iter] != -1 && PatternArr[Iter] == PatternArrCheck[Iter])
 					{
-						if (PatternArr[Iter] != -1)
-						{
-							Kkwallas[PatternArr[Iter]]->BeerSuccess();
-						}
+						Kkwallas[PatternArr[Iter]]->BeerSuccess();
 					}
 					else
 					{
@@ -338,25 +348,39 @@ void ANoteManager::Tick(float DeltaTime)
 			}
 		}
 
-		// 여기서의 BeatCount는 실제 입력을 받을 비트를 의미
-		if (bAnyKeyDown && (bProcessed == false) && BeatCount < 7)
+		if (bAnyKeyDown)
 		{
-			for (int32 Iter = 0; Iter < Kkwallas.Num(); ++Iter)
+			int32 CheckBeatCount = CurTimeSec / BPMTimeMs;
+
+			// 빨리 눌렀을 경우 TestBeatCount가 현재보다 느림
+			if ((CheckBeatCount * BPMTimeMs) + GradeCheck < OnKeyDownTime)
 			{
-				if (IsValid(Kkwallas[Iter]) && Kkwallas[Iter]->PointCheck(CachePos))
+				CheckBeatCount++;
+				UE_LOG(LogTemp, Warning, TEXT("?"));
+
+			}
+			// 늦게 눌렀을 경우 CheckBeatCount가 현재와 맞음
+
+			// 입력할 수 있는 비트일 경우
+			if (CheckBeatCount < 6)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("%d %d"), CheckBeatCount, OnKeyDownTime);
+				if ((CheckBeatCount * BPMTimeMs) - GradeCheck <= OnKeyDownTime && OnKeyDownTime <= (CheckBeatCount * BPMTimeMs) + GradeCheck)
 				{
-					if (((BeatCount - 1) * BPMTimeMs) - GradeCheck <= OnKeyDownTime && OnKeyDownTime <= ((BeatCount - 1) * BPMTimeMs) + GradeCheck)
+					for (int32 Iter = 0; Iter < Kkwallas.Num(); ++Iter)
 					{
-						Kkwallas[Iter]->BeerReady();
-						PatternArrCheck[BeatCount-1] = Iter;
+						if (IsValid(Kkwallas[Iter]) && Kkwallas[Iter]->PointCheck(CachePos))
+						{
+							Kkwallas[Iter]->BeerReady();
+							PatternArrCheck[CheckBeatCount] = Iter;
+							break;
+						}
 					}
-					bAnyKeyDown = false;
-					bProcessed = true;
-					OnKeyDownTime = -1;
-					CachePos = FVector2D::ZeroVector;
-					break;
 				}
 			}
+
+			bAnyKeyDown = false;
+			OnKeyDownTime = -1;
 		}
 	}
 
@@ -364,28 +388,27 @@ void ANoteManager::Tick(float DeltaTime)
 	{
 		if ((BeatCount * BPMTimeMs) <= CurTimeSec)
 		{
-			bAnyKeyDown = false;
-			bProcessed = false;
-			OnKeyDownTime = -1;
-			CachePos = FVector2D::ZeroVector;
 			BeatCount++;
-			PreBeatCount--;
-
-			if (PreBeatCount < 0)
+			if (PreBeatCount < BeatCount)
 			{
 				BeatCount = 0;
 				CurTimeSec = 0;
-				PreBeatCount = 4;
+
+				OnKeyDownTime = -1;
+
 				if (PlayerNum <= 0)
 				{
+					bAnyKeyDown = true;
+
 					UE_LOG(LogTemp, Error, TEXT("PreBeat"));
 					GameState = ManagerState::PreBeat;
-					HudWidget->ChangeBreakWidgetVisibility(false);
 					HudWidget->ShowFailePage(true);
 					AudioComponent->SetParameter(TEXT("Turn"), 0.0f);
 				}
 				else
 				{
+					bAnyKeyDown = false;
+
 					UE_LOG(LogTemp, Error, TEXT("PlayTurn"));
 					GameState = ManagerState::PlayTurn;
 					AudioComponent->SetParameter(TEXT("Turn"), 0.0f);
@@ -426,6 +449,7 @@ void ANoteManager::Tick(float DeltaTime)
 			}
 		}
 	}
+
 	else if (GameState == ManagerState::Fail)
 	{
 
@@ -434,7 +458,7 @@ void ANoteManager::Tick(float DeltaTime)
 
 void ANoteManager::TouchInput(const FVector2D& InPos)
 {
-	if (bAnyKeyDown || bProcessed)
+	if (bAnyKeyDown)
 	{
 		return;
 	}

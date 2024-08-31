@@ -50,8 +50,8 @@ void ATestTouchPlayerController::SetupInputComponent()
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
 	{
-		EnhancedInputComponent->BindAction(ClickedAction, ETriggerEvent::Started, this, &ATestTouchPlayerController::OnClickedTriggered);
-		EnhancedInputComponent->BindAction(TouchAction, ETriggerEvent::Started, this, &ATestTouchPlayerController::OnTouchTriggered);
+		EnhancedInputComponent->BindAction(ClickedAction, ETriggerEvent::Triggered, this, &ATestTouchPlayerController::OnClickedTriggered);
+		EnhancedInputComponent->BindAction(TouchAction, ETriggerEvent::Triggered, this, &ATestTouchPlayerController::OnTouchTriggered);
 	}
 }
 
@@ -90,6 +90,12 @@ void ATestTouchPlayerController::OnClickedTriggered()
 		bHitSuccessful = GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, true, Hit);
 	}
 	bIsTouch = false;
+
+	if (bHitSuccessful == false)
+	{
+		return;
+	}
+
 	FVector HitPos = Hit.Location;
 
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), TouchParticle, HitPos);

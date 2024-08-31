@@ -63,17 +63,15 @@ private:
 
 	int32 BPMTimeMs;
 	int32 BeatCount;
-
 	int32 CurTimeSec;
 
 	bool bAnyKeyDown;
 	int32 OnKeyDownTime;
 	FVector2D CachePos;
 
-	bool bProcessed;
+	bool IsBGMPlay;
 
 	ManagerState GameState;
-
 	UPROPERTY()
 	TArray<int32> PatternArr;
 	UPROPERTY()
