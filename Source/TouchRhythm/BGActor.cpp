@@ -3,6 +3,7 @@
 
 #include "BGActor.h"
 #include "PaperSpriteComponent.h"
+#include "Camera/CameraComponent.h"
 #include "Materials/MaterialInterface.h"
 
 // Sets default values
@@ -14,6 +15,13 @@ ABGActor::ABGActor()
 	BGSprite = CreateDefaultSubobject<UPaperSpriteComponent>(TEXT("BGSprite"));
 	SetRootComponent(BGSprite);
 
+	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	CameraComp->SetupAttachment(GetRootComponent());
+	CameraComp->SetRelativeLocationAndRotation(FVector(0.0f, -500.0f, 0.0f), FRotator(0.0f, 90.0f, 0.0f));
+	CameraComp->SetProjectionMode(ECameraProjectionMode::Orthographic);
+	CameraComp->SetOrthoWidth(1920.0f);
+	CameraComp->SetConstraintAspectRatio(true);
+	CameraComp->SetAspectRatio(1920.0f / 1080.f);
 }
 
 // Called when the game starts or when spawned

@@ -15,7 +15,7 @@ void AKkwallaHUD::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UUserWidget* CreatedWidget = CreateWidget<UUserWidget>(GetWorld(), BreakTimeWidgetAsset.LoadSynchronous());
+	UUserWidget* CreatedWidget = CreateWidget<UUserWidget>(GetOwningPlayerController(), BreakTimeWidgetAsset.LoadSynchronous());
 	BreakWidget = Cast<UBreakPage>(CreatedWidget);
 	if (IsValid(BreakWidget))
 	{
@@ -23,7 +23,7 @@ void AKkwallaHUD::BeginPlay()
 		ChangeBreakWidgetVisibility(true);
 	}
 
-	FailWidget = CreateWidget<UUserWidget>(GetWorld(), FailWidgetAsset.LoadSynchronous());
+	FailWidget = CreateWidget<UUserWidget>(GetOwningPlayerController(), FailWidgetAsset.LoadSynchronous());
 	if (IsValid(FailWidget))
 	{
 		FailWidget->AddToViewport();
@@ -51,6 +51,11 @@ void AKkwallaHUD::ChangeBreakWidgetVisibility(bool bShow)
 
 void AKkwallaHUD::ShowFailePage(bool bShow)
 {
+	if (IsValid(FailWidget) == false)
+	{
+		return;
+	}
+
 	if (bShow)
 	{
 		FailWidget->SetVisibility(ESlateVisibility::Visible);

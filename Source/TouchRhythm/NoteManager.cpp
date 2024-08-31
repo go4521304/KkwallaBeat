@@ -8,7 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "KkwallaHUD.h"
 
-const int32 MS_TIME = 10000000;
+const int32 MS_TIME = 1000;
 
 // Sets default values
 ANoteManager::ANoteManager()
@@ -22,7 +22,7 @@ ANoteManager::ANoteManager()
 	CurTimeSec = 0;
 	bAnyKeyDown =false;
 	OnKeyDownTime = 0;
-	CachePos = {};
+	CachePos = FVector2D::ZeroVector;
 
 	GradeCheck = 45;
 	BGMBias = 100;
@@ -62,7 +62,7 @@ void ANoteManager::BeginPlay()
 	
 	PatternArr.Reserve(8);
 	PatternArrCheck.Reserve(8);
-	for (int32 PatternIter = 0; PatternIter < 8; ++PatternIter)
+	for (int32 Iter = 0; Iter < Kkwallas.Num(); ++Iter)
 	{
 		PatternArr.Add(-1);
 		PatternArrCheck.Add(-1);
@@ -113,13 +113,14 @@ void ANoteManager::Tick(float DeltaTime)
 				bAnyKeyDown = false;
 				bProcessed = false;
 				OnKeyDownTime = -1;
-				CachePos = {};
+				CachePos = FVector2D::ZeroVector;
 				BeatCount = 0;
 				CurTimeSec = 0;
-				for (int32 PatternIter = 0; PatternIter < 6; ++PatternIter)
+
+				for (int32 Iter = 0; Iter < Kkwallas.Num(); ++Iter)
 				{
-					PatternArr[PatternIter] = -1;
-					PatternArrCheck[PatternIter] = -1;
+					PatternArr[Iter] = -1;
+					PatternArrCheck[Iter] = -1;
 				}
 				return;
 			}
@@ -130,10 +131,12 @@ void ANoteManager::Tick(float DeltaTime)
 	{
 		if ((BeatCount * BPMTimeMs) <= CurTimeSec)
 		{
+			UE_LOG(LogTemp, Error, TEXT("BeatCount %d"), CurTimeSec);
+
 			bAnyKeyDown = false;
 			bProcessed = false;
 			OnKeyDownTime = -1;
-			CachePos = {};
+			CachePos = FVector2D::ZeroVector;
 			BeatCount++;
 
 			if (BeatCount > 8)
@@ -168,21 +171,22 @@ void ANoteManager::Tick(float DeltaTime)
 			}
 		}
 
-		if (bAnyKeyDown && (bProcessed == false) && BeatCount < 8)
+		// 여기서의 BeatCount는 실제 입력을 받을 비트를 의미
+		if (bAnyKeyDown && (bProcessed == false) && BeatCount < 7)
 		{
-			for (int32 CharIndex = 0; CharIndex < Kkwallas.Num(); ++CharIndex)
+			for (int32 Iter = 0; Iter < Kkwallas.Num(); ++Iter)
 			{
-				if (IsValid(Kkwallas[CharIndex]) && Kkwallas[CharIndex]->PointCheck(CachePos))
+				if (IsValid(Kkwallas[Iter]) && Kkwallas[Iter]->PointCheck(CachePos))
 				{
 					if (((BeatCount - 1) * BPMTimeMs) - GradeCheck <= OnKeyDownTime && OnKeyDownTime <= ((BeatCount - 1) * BPMTimeMs) + GradeCheck)
 					{
-						Kkwallas[CharIndex]->BeerReady();
-						PatternArr[(BeatCount - 1)] = CharIndex;
+						Kkwallas[Iter]->BeerReady();
+						PatternArr[(BeatCount - 1)] = Iter;
 					}
 					bAnyKeyDown = false;
 					bProcessed = true;
 					OnKeyDownTime = -1;
-					CachePos = {};
+					CachePos = FVector2D::ZeroVector;
 					break;
 				}
 			}
@@ -196,7 +200,7 @@ void ANoteManager::Tick(float DeltaTime)
 			bAnyKeyDown = false;
 			bProcessed = false;
 			OnKeyDownTime = -1;
-			CachePos = {};
+			CachePos = FVector2D::ZeroVector;
 			BeatCount++;
 			PreBeatCount--;
 
@@ -252,7 +256,7 @@ void ANoteManager::Tick(float DeltaTime)
 			bAnyKeyDown = false;
 			bProcessed = false;
 			OnKeyDownTime = -1;
-			CachePos = {};
+			CachePos = FVector2D::ZeroVector;
 			BeatCount++;
 
 			if (BeatCount > 8)
@@ -262,7 +266,7 @@ void ANoteManager::Tick(float DeltaTime)
 				PreBeatCount = 4;
 				PlayerNum--;
 				bool Success = true;
-				for (int32 Iter = 0; Iter < PatternArr.Num(); ++Iter)
+				for (int32 Iter = 0; Iter < Kkwallas.Num(); ++Iter)
 				{
 					if (PatternArr[Iter] != PatternArrCheck[Iter])
 					{
@@ -276,12 +280,10 @@ void ANoteManager::Tick(float DeltaTime)
 					HudWidget->ChangeBreakWidgetVisibility(true);
 					AudioComponent->SetParameter(TEXT("Turn"), 1.0f);
 					UE_LOG(LogTemp, Error, TEXT("PlayTurnBreak"));
-					for (AKkwalla* CharIter : Kkwallas)
+					for (int32 Iter = 0; Iter < Kkwallas.Num(); ++Iter)
 					{
-						if (IsValid(CharIter))
-						{
-							CharIter->Reset();
-						}
+						Kkwallas[Iter]->Reset();
+						PatternArrCheck[Iter] = -1;
 					}
 				}
 				else
@@ -302,7 +304,7 @@ void ANoteManager::Tick(float DeltaTime)
 			}
 			else if (BeatCount == 8)
 			{
-				for (int32 Iter = 0; Iter < PatternArr.Num(); ++Iter)
+				for (int32 Iter = 0; Iter < Kkwallas.Num(); ++Iter)
 				{
 					if (PatternArr[Iter] == PatternArrCheck[Iter])
 					{
@@ -336,21 +338,22 @@ void ANoteManager::Tick(float DeltaTime)
 			}
 		}
 
-		if (bAnyKeyDown && (bProcessed == false) && BeatCount < 8)
+		// 여기서의 BeatCount는 실제 입력을 받을 비트를 의미
+		if (bAnyKeyDown && (bProcessed == false) && BeatCount < 7)
 		{
-			for (int32 CharIndex = 0; CharIndex < Kkwallas.Num(); ++CharIndex)
+			for (int32 Iter = 0; Iter < Kkwallas.Num(); ++Iter)
 			{
-				if (IsValid(Kkwallas[CharIndex]) && Kkwallas[CharIndex]->PointCheck(CachePos))
+				if (IsValid(Kkwallas[Iter]) && Kkwallas[Iter]->PointCheck(CachePos))
 				{
-					if (((BeatCount - 1) * BPMTimeMs) - GradeCheck < OnKeyDownTime && OnKeyDownTime < ((BeatCount - 1) * BPMTimeMs) + GradeCheck)
+					if (((BeatCount - 1) * BPMTimeMs) - GradeCheck <= OnKeyDownTime && OnKeyDownTime <= ((BeatCount - 1) * BPMTimeMs) + GradeCheck)
 					{
-						Kkwallas[CharIndex]->BeerReady();
-						PatternArrCheck[BeatCount-1] = CharIndex;
+						Kkwallas[Iter]->BeerReady();
+						PatternArrCheck[BeatCount-1] = Iter;
 					}
 					bAnyKeyDown = false;
 					bProcessed = true;
 					OnKeyDownTime = -1;
-					CachePos = {};
+					CachePos = FVector2D::ZeroVector;
 					break;
 				}
 			}
@@ -364,7 +367,7 @@ void ANoteManager::Tick(float DeltaTime)
 			bAnyKeyDown = false;
 			bProcessed = false;
 			OnKeyDownTime = -1;
-			CachePos = {};
+			CachePos = FVector2D::ZeroVector;
 			BeatCount++;
 			PreBeatCount--;
 
@@ -435,6 +438,7 @@ void ANoteManager::TouchInput(const FVector2D& InPos)
 	{
 		return;
 	}
+	UE_LOG(LogTemp, Error, TEXT("%d"), CurTimeSec);
 	bAnyKeyDown = true;
 	OnKeyDownTime = CurTimeSec;
 	CachePos = InPos;

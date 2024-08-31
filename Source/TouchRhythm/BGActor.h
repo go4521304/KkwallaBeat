@@ -3,14 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "GameFramework/Pawn.h"
 #include "BGActor.generated.h"
 
+class UCameraComponent;
 class UPaperSpriteComponent;
 class UMaterialInstanceDynamic;
 
 UCLASS()
-class TOUCHRHYTHM_API ABGActor : public AActor
+class TOUCHRHYTHM_API ABGActor : public APawn
 {
 	GENERATED_BODY()
 	
@@ -32,6 +33,9 @@ public:
 
 	
 private:
+	UPROPERTY(EditAnywhere)
+	UCameraComponent* CameraComp;
+
 	UPROPERTY(EditAnywhere)
 	UPaperSpriteComponent* BGSprite;
 
