@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="ParameterPreset" id="{56a0c812-c387-403d-bb6f-29214273e76b}">
+		<property name="name">
+			<value>Turn</value>
+		</property>
+		<relationship name="folder">
+			<destination>{dcf50b0e-247b-44f6-b1e8-6c01dcbe86e7}</destination>
+		</relationship>
+		<relationship name="parameter">
+			<destination>{1adbac7a-d70c-4184-9703-dc492008b270}</destination>
+		</relationship>
+	</object>
+	<object class="GameParameter" id="{1adbac7a-d70c-4184-9703-dc492008b270}">
+		<property name="initialValue">
+			<value>0</value>
+		</property>
+		<relationship name="modulators">
+			<destination>{ccb37dda-1ffa-48a0-aeb9-349c25034a03}</destination>
+		</relationship>
+	</object>
+	<object class="SeekModulator" id="{ccb37dda-1ffa-48a0-aeb9-349c25034a03}">
+		<property name="nameOfPropertyBeingModulated">
+			<value>cursorPosition</value>
+		</property>
+		<property name="speedAscending">
+			<value>0.5</value>
+		</property>
+	</object>
+</objects>

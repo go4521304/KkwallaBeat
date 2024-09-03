@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="AudioFile" id="{7c28fa36-1b64-454c-85c2-1f8d827aab13}">
+		<property name="assetPath">
+			<value>SFX_Fail_Vox_2.wav</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>44.0999985</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>1.3159183673469388</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{b32bcf2f-21e7-4102-8f72-00c25b5c4501}</destination>
+		</relationship>
+	</object>
+</objects>

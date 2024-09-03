@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="AudioFile" id="{a03171cc-fc81-45bd-bb4c-0ecd8a7f0899}">
+		<property name="assetPath">
+			<value>Rhythm Intro BGM.wav</value>
+		</property>
+		<property name="isStreaming">
+			<value>true</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>44.0999985</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>56.949229024943314</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{b32bcf2f-21e7-4102-8f72-00c25b5c4501}</destination>
+		</relationship>
+	</object>
+</objects>
