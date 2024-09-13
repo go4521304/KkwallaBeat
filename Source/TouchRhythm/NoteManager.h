@@ -10,6 +10,7 @@ class ABGActor;
 class AKkwalla;
 class UFMODEvent;
 class AKkwallaHUD;
+class USoundWave;
 
 UENUM()
 enum class ManagerState
@@ -80,4 +81,8 @@ private:
 
 	UPROPERTY()
 	AKkwallaHUD* HudWidget;
+
+	UPROPERTY(EditAnywhere, Category = "Manager")
+	USoundWave* WaveMusic;
+
 };

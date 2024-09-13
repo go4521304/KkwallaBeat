@@ -7,6 +7,7 @@
 #include "FMODBlueprintStatics.h"
 #include "Kismet/GameplayStatics.h"
 #include "KkwallaHUD.h"
+#include "fmod.hpp"
 
 const int32 MS_TIME = 1000;
 
@@ -82,6 +83,56 @@ void ANoteManager::Tick(float DeltaTime)
 	int32 DeltaTimeSec = static_cast<int32>(DeltaTime * MS_TIME);
 	CurTimeSec += DeltaTimeSec;
 
+	static bool checkccc = true;
+	static int32 ccc = 0;
+	static int32 summm = 0;
+
+	if (AudioComponent->StudioInstance)
+	{
+		FMOD::ChannelGroup* Channel;
+		AudioComponent->StudioInstance->getChannelGroup(&Channel);
+		if (Channel)
+		{
+			FMOD::DSP* HeadDSP;
+			Channel->getDSP(FMOD_CHANNELCONTROL_DSP_HEAD, &HeadDSP);
+			if (HeadDSP)
+			{
+
+				HeadDSP->setMeteringEnabled(false, true);
+				FMOD_DSP_METERING_INFO Info = {};
+				HeadDSP->getMeteringInfo(nullptr, &Info);
+
+				GEngine->ClearOnScreenDebugMessages();
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(
+					TEXT("Metering: %d channels, %d len.  rms: %.3f, %.3f, %.3f, %.3f, %.3f, %.3f"),
+					Info.numchannels, Info.numsamples,
+					Info.rmslevel[0], Info.rmslevel[1],
+					Info.rmslevel[2], Info.rmslevel[3],
+					Info.rmslevel[4], Info.rmslevel[5])
+				);
+				UE_LOG(LogTemp, Error, TEXT("Metering: %d channels, %d len.  rms: %.3f, %.3f, %.3f, %.3f, %.3f, %.3f"),
+					Info.numchannels, Info.numsamples,
+					Info.rmslevel[0], Info.rmslevel[1],
+					Info.rmslevel[2], Info.rmslevel[3],
+					Info.rmslevel[4], Info.rmslevel[5]);
+				if (checkccc && Info.rmslevel[0] >= 0.3f)
+				{
+					checkccc = false;
+					summm = summm + (CurTimeSec - ccc);
+					ccc = CurTimeSec;
+
+					UE_LOG(LogTemp, Warning, TEXT("! %d %d"), summm / BeatCount, BeatCount);
+
+				}
+				else if (checkccc == false && Info.rmslevel[0] < 0.1f)
+				{
+					checkccc = true;
+				}
+			}
+		}
+	}
+
+
 	// 배경 업데이트
 	if (IsValid(BgActor))
 	{
@@ -96,6 +147,7 @@ void ANoteManager::Tick(float DeltaTime)
 		{
 			AudioComponent->SetParameter(TEXT("Turn"), 1.0f);
 			AudioComponent->Play();
+			//UGameplayStatics::PlaySound2D(this, WaveMusic, 1.f);
 			IsBGMPlay = true;
 		}
 		else
