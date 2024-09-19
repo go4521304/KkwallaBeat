@@ -75,6 +75,6 @@ private:
 	UPROPERTY()
 	AKkwallaHUD* HudWidget;
 
-	FMOD::DSP* HeadDSP;
-
+	int32 LastBeatCheckTime;
+	bool BeatFlipFlop;
 };

@@ -16,6 +16,7 @@
 
 
  class ANoteManager;
+ class ANoteManagerV2;
 
 UCLASS()
 class TOUCHRHYTHM_API ATestTouchPlayerController : public APlayerController
@@ -46,6 +47,9 @@ private:
 
 	UPROPERTY()
 	ANoteManager* NoteManager;
+
+	UPROPERTY()
+	ANoteManagerV2* NoteManagerV2;
 
 	bool bIsTouch;
 };

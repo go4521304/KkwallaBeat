@@ -12,6 +12,7 @@
 #include "NiagaraSystem.h"
 
 #include "NoteManager.h"
+#include "NoteManagerV2.h"
 #include "EngineUtils.h"
 
 ATestTouchPlayerController::ATestTouchPlayerController()
@@ -74,6 +75,15 @@ void ATestTouchPlayerController::BeginPlay()
 		}
 	}
 
+	for (ANoteManagerV2* Iter : TActorRange<ANoteManagerV2>(GetWorld()))
+	{
+		if (IsValid(Iter))
+		{
+			NoteManagerV2 = Iter;
+			break;
+		}
+	}
+
 	SetShowMouseCursor(true);
 }
 
@@ -102,7 +112,15 @@ void ATestTouchPlayerController::OnClickedTriggered()
 
 	//UE_LOG(LogTemp, Error, TEXT("%f, %f, %f"), HitPos.X, HitPos.Y, HitPos.Z);
 
-	NoteManager->TouchInput(FVector2D(HitPos));
+	if (IsValid(NoteManager))
+	{
+		NoteManager->TouchInput(FVector2D(HitPos));
+	}
+
+	if (IsValid(NoteManagerV2))
+	{
+		NoteManagerV2->TouchInput(FVector2D(HitPos));
+	}
 }
 
 void ATestTouchPlayerController::OnTouchTriggered()

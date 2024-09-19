@@ -43,6 +43,9 @@ void ANoteManagerV2::BeginPlay()
 	BeatCount = 0;
 	GameState = ManagerStateV2::PreBeat;
 
+	LastBeatCheckTime = 0;
+	BeatFlipFlop = false;
+
 	// 시작할 때 입력을 안받겠음
 	bAnyKeyDown = true;
 	OnKeyDownTime = -1;
@@ -69,25 +72,6 @@ void ANoteManagerV2::BeginPlay()
 	// 노래 바로 시작
 	AudioComponent->SetParameter(TEXT("Turn"), 0.0f);
 	AudioComponent->Play();
-
-	if (AudioComponent->StudioInstance)
-	{
-		FMOD::ChannelGroup* Channel;
-		AudioComponent->StudioInstance->getChannelGroup(&Channel);
-		if (Channel)
-		{
-			Channel->getDSP(FMOD_CHANNELCONTROL_DSP_HEAD, &HeadDSP);
-			if (HeadDSP)
-			{
-
-				HeadDSP->setMeteringEnabled(false, true);
-			}
-		}
-	}
-	else
-	{
-		ensureAlwaysMsgf(false, TEXT("No Sound Instance!"));
-	}
 }
 
 // Called every frame
@@ -95,46 +79,48 @@ void ANoteManagerV2::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	int32 DeltaTimeSec = static_cast<int32>(DeltaTime * MS_TIME);
-	CurTimeSec += DeltaTimeSec;
-
+	// 비트 체크
+	FMOD_DSP_METERING_INFO Info = {};
 	if (AudioComponent->StudioInstance)
 	{
 		FMOD::ChannelGroup* Channel;
 		AudioComponent->StudioInstance->getChannelGroup(&Channel);
 		if (Channel)
 		{
+			FMOD::DSP* HeadDSP;
 			Channel->getDSP(FMOD_CHANNELCONTROL_DSP_HEAD, &HeadDSP);
 			if (HeadDSP)
 			{
-
 				HeadDSP->setMeteringEnabled(false, true);
+				HeadDSP->getMeteringInfo(nullptr, &Info);
+
+				// 배경 업데이트
+				for (ABGActor* BgActor : BgActors)
+				{
+					if (IsValid(BgActor))
+					{
+						BgActor->SetPhase(Info.rmslevel[0]);
+					}
+				}
 			}
 		}
 	}
-
-	// 비트 체크
-	FMOD_DSP_METERING_INFO Info = {};
-	if (HeadDSP)
+	else
 	{
-		HeadDSP->getMeteringInfo(nullptr, &Info);
-
-		// 배경 업데이트
-		for (ABGActor* BgActor : BgActors)
-		{
-			if (IsValid(BgActor))
-			{
-				BgActor->SetPhase(Info.rmslevel[0]);
-			}
-		}
+		ensureAlwaysMsgf(false, TEXT("No Sound Instance!"));
+		return;
 	}
+
+	int32 DeltaTimeSec = static_cast<int32>(DeltaTime * MS_TIME);
+	CurTimeSec += DeltaTimeSec;
 
 	if (GameState == ManagerStateV2::PreBeat)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Metering: %d channels, %d len.  rms: %.3f  %.3f"), Info.numchannels, Info.numsamples, Info.rmslevel[0], Info.rmslevel[1]);
-		if (PreBeatCount < BeatCount)
+		if (PreBeatCount <= BeatCount)
 		{
-			BPMTimeMs /= (BeatCount - 1);
+			BPMTimeMs /= BeatCount;
+			BPMTimeMs += 30; // 측정값에 수동으로 30ms 추가해줌 (조금 빠르게 측정이 되고있음)
 
 			bAnyKeyDown = false;
 			OnKeyDownTime = -1;
@@ -155,19 +141,19 @@ void ANoteManagerV2::Tick(float DeltaTime)
 		}
 		else
 		{
-			static int32 LastBeatCheckTime = 0;
-			static bool BeatFlipFlop = false;
-			if (BeatFlipFlop == false && Info.rmslevel[0] >= 0.3f)
+			if (BeatFlipFlop == false && Info.rmslevel[0] >= 0.02f)
 			{
 				BPMTimeMs += CurTimeSec - LastBeatCheckTime;
 				LastBeatCheckTime = CurTimeSec;
 
 				BeatCount++;
 				BeatFlipFlop = true;
+
+				UE_LOG(LogTemp, Error, TEXT("MakeTurn"));
 			}
-			else if (BeatFlipFlop && Info.rmslevel[0] < 0.1f)
+			else if (BeatFlipFlop && Info.rmslevel[0] < 0.01f)
 			{
-				BeatFlipFlop = true;
+				BeatFlipFlop = false;
 			}
 		}
 	}
@@ -438,13 +424,14 @@ void ANoteManagerV2::Tick(float DeltaTime)
 				CurTimeSec = 0;
 
 				OnKeyDownTime = -1;
+				HudWidget->ChangeBreakWidgetVisibility(false);
 
 				if (PlayerNum <= 0)
 				{
 					bAnyKeyDown = true;
 
-					UE_LOG(LogTemp, Error, TEXT("PreBeat"));
-					GameState = ManagerStateV2::PreBeat;
+					UE_LOG(LogTemp, Error, TEXT("MakeTurn"));
+					GameState = ManagerStateV2::MakeTurn;
 					HudWidget->ShowFailePage(true);
 					AudioComponent->SetParameter(TEXT("Turn"), 0.0f);
 				}
