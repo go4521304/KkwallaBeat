@@ -9,11 +9,25 @@
 /**
  * 
  */
+
+USTRUCT()
+struct FBGColor
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere)
+	FLinearColor ColorA;
+
+	UPROPERTY(EditAnywhere)
+	FLinearColor ColorB;
+};
+
 UCLASS()
 class TOUCHRHYTHM_API UColorDataAsset : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
 	
+public:
 	UPROPERTY(EditAnywhere)
-	TArray<FLinearColor> ColorData;
+	TArray<FBGColor> ColorData;
 };

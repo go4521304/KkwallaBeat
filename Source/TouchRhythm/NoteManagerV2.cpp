@@ -2,11 +2,12 @@
 
 
 #include "NoteManagerV2.h"
-#include "BGActor.H"
+#include "BGActorV2.H"
 #include "Kkwalla.h"
 #include "FMODBlueprintStatics.h"
 #include "Kismet/GameplayStatics.h"
 #include "KkwallaHUD.h"
+#include "ColorDataAsset.h"
 
 const int32 MS_TIME = 1000;
 
@@ -60,6 +61,22 @@ void ANoteManagerV2::BeginPlay()
 			HudWidget->ChangeBreakWidgetVisibility(false);
 		}
 	}
+
+	// 배경 세팅
+	if (IsValid(ColorDataAsset))
+	{
+		for (int32 BGIndex = 0; BGIndex < BgActors.Num(); ++BGIndex)
+		{
+			if (IsValid(BgActors[BGIndex]))
+			{
+				BgActors[BGIndex]->InitSet();
+				if (ColorDataAsset->ColorData.IsValidIndex(BGIndex))
+				{
+					BgActors[BGIndex]->SetBGColor(ColorDataAsset->ColorData[BGIndex].ColorA, ColorDataAsset->ColorData[BGIndex].ColorB);
+				}
+			}
+		}
+	}
 	
 	PatternArr.Reserve(8);
 	PatternArrCheck.Reserve(8);
@@ -95,7 +112,7 @@ void ANoteManagerV2::Tick(float DeltaTime)
 				HeadDSP->getMeteringInfo(nullptr, &Info);
 
 				// 배경 업데이트
-				for (ABGActor* BgActor : BgActors)
+				for (ABGActorV2* BgActor : BgActors)
 				{
 					if (IsValid(BgActor))
 					{

@@ -4,20 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
-#include "BGActor.generated.h"
+#include "BGActorV2.generated.h"
 
 class UCameraComponent;
 class UPaperSpriteComponent;
 class UMaterialInstanceDynamic;
 
 UCLASS()
-class TOUCHRHYTHM_API ABGActor : public APawn
+class TOUCHRHYTHM_API ABGActorV2 : public APawn
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	ABGActor();
+	ABGActorV2();
 
 protected:
 	// Called when the game starts or when spawned
@@ -35,9 +35,6 @@ public:
 
 	
 private:
-	UPROPERTY(EditAnywhere)
-	UCameraComponent* CameraComp;
-
 	UPROPERTY(EditAnywhere)
 	UPaperSpriteComponent* BGSprite;
 
