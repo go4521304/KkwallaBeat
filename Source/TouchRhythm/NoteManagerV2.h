@@ -7,11 +7,12 @@
 #include "fmod.hpp"
 #include "NoteManagerV2.generated.h"
 
-class ABGActor;
+class ABGActorV2;
 class AKkwalla;
 class UFMODEvent;
 class AKkwallaHUD;
 class USoundWave;
+class UColorDataAsset;
 
 UENUM()
 enum class ManagerStateV2
@@ -43,7 +44,7 @@ private:
 	class UFMODAudioComponent* AudioComponent;
 	
 	UPROPERTY(EditAnywhere, Category = "Manager")
-	TArray<ABGActor*> BgActors;
+	TArray<ABGActorV2*> BgActors;
 
 	UPROPERTY(EditAnywhere, Category = "Manager")
 	TArray<AKkwalla*> Kkwallas;
@@ -56,6 +57,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Manager")
 	int32 PreBeatCount;
+
+	UPROPERTY(EditAnywhere, Category = "Manager")
+	TObjectPtr<UColorDataAsset> ColorDataAsset;
 
 	int32 BPMTimeMs;
 	int32 BeatCount;
