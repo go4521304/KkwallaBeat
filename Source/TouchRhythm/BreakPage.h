@@ -13,6 +13,9 @@ UCLASS()
 class TOUCHRHYTHM_API UBreakPage : public UUserWidget
 {
 	GENERATED_BODY()
+
+	UPROPERTY(meta = (BindWidget))
+	class UImage* BGImage;
 	
 	UPROPERTY(Transient, meta = (BindWidgetAnim))
 	class UWidgetAnimation* A;
@@ -23,7 +26,13 @@ class TOUCHRHYTHM_API UBreakPage : public UUserWidget
 	UPROPERTY(Transient, meta = (BindWidgetAnim))
 	class UWidgetAnimation* Count3;
 
+	UPROPERTY()
+	class UMaterialInstanceDynamic* MatInst;
+
 public:
+	virtual void NativeOnInitialized() override;
+
+	void SetBGColor(FLinearColor InColorA, FLinearColor InColorB);
 	void PlayAnimA();
 	void PlayAnimCount1();
 	void PlayAnimCount2();

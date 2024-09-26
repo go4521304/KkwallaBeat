@@ -14,13 +14,16 @@ AKkwallaHUD::AKkwallaHUD()
 void AKkwallaHUD::BeginPlay()
 {
 	Super::BeginPlay();
+}
 
+void AKkwallaHUD::InitSet()
+{
 	UUserWidget* CreatedWidget = CreateWidget<UUserWidget>(GetOwningPlayerController(), BreakTimeWidgetAsset.LoadSynchronous());
 	BreakWidget = Cast<UBreakPage>(CreatedWidget);
 	if (IsValid(BreakWidget))
 	{
 		BreakWidget->AddToViewport();
-		ChangeBreakWidgetVisibility(true);
+		ChangeBreakWidgetVisibility(false);
 	}
 
 	FailWidget = CreateWidget<UUserWidget>(GetOwningPlayerController(), FailWidgetAsset.LoadSynchronous());
@@ -31,7 +34,7 @@ void AKkwallaHUD::BeginPlay()
 	}
 }
 
-void AKkwallaHUD::ChangeBreakWidgetVisibility(bool bShow)
+void AKkwallaHUD::ChangeBreakWidgetVisibility(bool bShow, FLinearColor InColorA /*= FLinearColor::Black*/, FLinearColor InColorB /*= FLinearColor::Black*/)
 {
 	if (IsValid(BreakWidget) == false)
 	{
@@ -41,6 +44,7 @@ void AKkwallaHUD::ChangeBreakWidgetVisibility(bool bShow)
 	if (bShow)
 	{
 		BreakWidget->SetVisibility(ESlateVisibility::Visible);
+		BreakWidget->SetBGColor(InColorA, InColorB);
 		BreakWidget->PlayAnimA();
 	}
 	else

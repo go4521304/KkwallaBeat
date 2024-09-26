@@ -18,7 +18,7 @@ class UColorDataAsset;
 UENUM()
 enum class ManagerStateV2
 {
-	PreBeat, MakeTurn, MakeTurnBreak, PlayTurn, PlayTurnBreak, Fail
+	PreBeat, MakeTurn, MakeTurnBreak, PlayTurn, PlayTurnBreak, Success, Fail
 };
 
 UCLASS()
@@ -72,11 +72,13 @@ private:
 	FVector2D CachePos;
 
 	ManagerStateV2 GameState;
-	UPROPERTY()
 	TArray<int32> PatternArr;
-	UPROPERTY()
 	TArray<int32> PatternArrCheck;
+
+	// 플레이어 턴 관련
 	int32 PlayerNum;
+	TArray<int32> PlayerTurn;
+	int32 CurTurnIndex;
 
 	UPROPERTY()
 	AKkwallaHUD* HudWidget;

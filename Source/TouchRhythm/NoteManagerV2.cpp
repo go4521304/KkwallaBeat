@@ -30,7 +30,8 @@ ANoteManagerV2::ANoteManagerV2()
 	AudioComponent = CreateDefaultSubobject<UFMODAudioComponent>(TEXT("AudioComponent"));
 	AudioComponent->SetupAttachment(RootComponent);
 
-	PlayerNum = 5;
+	PlayerNum = 0;
+	CurTurnIndex = 0;
 }
 
 // Called when the game starts or when spawned
@@ -52,13 +53,33 @@ void ANoteManagerV2::BeginPlay()
 	OnKeyDownTime = -1;
 	CachePos = FVector2D::ZeroVector;
 
+	// 플레이어 세팅
+	PlayerNum = 5; // (추후 initset 함수로 분리하고 플레이어 수를 입력받도록)
+	CurTurnIndex = 0;
+
+	PlayerTurn.Reserve(PlayerNum);
+	for (int32 i = 0; i < PlayerNum; ++i)
+	{
+		PlayerTurn.Add(i);
+	}
+	for (int32 i = 0; i < PlayerNum; ++i)
+	{
+		int32 SwapIndex = FMath::RandRange(0, PlayerNum - 1);
+		if (i != SwapIndex)
+		{
+			PlayerTurn.Swap(i, SwapIndex);
+		}
+	}
+
 	APlayerController* PlayerCon = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	if (IsValid(PlayerCon))
 	{
 		HudWidget = PlayerCon->GetHUD<AKkwallaHUD>();
 		if (IsValid(HudWidget))
 		{
-			HudWidget->ChangeBreakWidgetVisibility(false);
+			int32 CurrentPlayer = PlayerTurn[CurTurnIndex];
+			HudWidget->InitSet();
+			HudWidget->ChangeBreakWidgetVisibility(true, ColorDataAsset->ColorData[CurrentPlayer].ColorA, ColorDataAsset->ColorData[CurrentPlayer].ColorB);
 		}
 	}
 
@@ -186,7 +207,8 @@ void ANoteManagerV2::Tick(float DeltaTime)
 			{
 				BeatCount = 0;
 				CurTimeSec = 0;
-				PlayerNum = 5; // 이걸 플레이할 사람 수
+				CurTurnIndex++;
+				//PlayerNum = 5; // 이걸 플레이할 사람 수
 
 				bAnyKeyDown = true;
 				OnKeyDownTime = -1;
@@ -202,7 +224,8 @@ void ANoteManagerV2::Tick(float DeltaTime)
 				UE_LOG(LogTemp, Error, TEXT("MakeTurnBreak"));
 				GameState = ManagerStateV2::MakeTurnBreak;
 				AudioComponent->SetParameter(TEXT("Turn"), 1.0f);
-				HudWidget->ChangeBreakWidgetVisibility(true);
+				int32 CurrentPlayer = PlayerTurn[CurTurnIndex];
+				HudWidget->ChangeBreakWidgetVisibility(true, ColorDataAsset->ColorData[CurrentPlayer].ColorA, ColorDataAsset->ColorData[CurrentPlayer].ColorB);
 				return;
 			}
 			else
@@ -266,6 +289,8 @@ void ANoteManagerV2::Tick(float DeltaTime)
 				bAnyKeyDown = false;
 				OnKeyDownTime = -1;
 
+				HudWidget->ChangeBreakWidgetVisibility(false);
+
 				UE_LOG(LogTemp, Error, TEXT("PlayTurn"));
 				GameState = ManagerStateV2::PlayTurn;
 				AudioComponent->SetParameter(TEXT("Turn"), 0.0f);
@@ -295,7 +320,7 @@ void ANoteManagerV2::Tick(float DeltaTime)
 
 				case 4:
 				{
-					HudWidget->ChangeBreakWidgetVisibility(false);
+					//HudWidget->ChangeBreakWidgetVisibility(false);
 				}
 				break;
 
@@ -317,7 +342,8 @@ void ANoteManagerV2::Tick(float DeltaTime)
 			{
 				BeatCount = 0;
 				CurTimeSec = 0;
-				PlayerNum--;
+				CurTurnIndex++;
+				/*PlayerNum--;*/
 
 				bAnyKeyDown = true;
 				OnKeyDownTime = -1;
@@ -334,6 +360,17 @@ void ANoteManagerV2::Tick(float DeltaTime)
 
 				if (bSuccess)
 				{
+					if (PlayerNum <= CurTurnIndex)
+					{
+						bAnyKeyDown = true;
+
+						UE_LOG(LogTemp, Error, TEXT("Success"));
+						GameState = ManagerStateV2::Success;
+						HudWidget->ShowFailePage(true); // ShowSuceessPage 로 수정 필요
+						AudioComponent->SetParameter(TEXT("Turn"), 0.0f);
+						return;
+					}
+
 					for (int32 Iter = 0; Iter < Kkwallas.Num(); ++Iter)
 					{
 						Kkwallas[Iter]->Reset();
@@ -343,7 +380,8 @@ void ANoteManagerV2::Tick(float DeltaTime)
 					UE_LOG(LogTemp, Error, TEXT("PlayTurnBreak"));
 					GameState = ManagerStateV2::PlayTurnBreak;
 					AudioComponent->SetParameter(TEXT("Turn"), 1.0f);
-					HudWidget->ChangeBreakWidgetVisibility(true);
+					int32 CurrentPlayer = PlayerTurn[CurTurnIndex];
+					HudWidget->ChangeBreakWidgetVisibility(true, ColorDataAsset->ColorData[CurrentPlayer].ColorA, ColorDataAsset->ColorData[CurrentPlayer].ColorB);
 				}
 				else
 				{
@@ -443,23 +481,11 @@ void ANoteManagerV2::Tick(float DeltaTime)
 				OnKeyDownTime = -1;
 				HudWidget->ChangeBreakWidgetVisibility(false);
 
-				if (PlayerNum <= 0)
-				{
-					bAnyKeyDown = true;
+				bAnyKeyDown = false;
 
-					UE_LOG(LogTemp, Error, TEXT("MakeTurn"));
-					GameState = ManagerStateV2::MakeTurn;
-					HudWidget->ShowFailePage(true);
-					AudioComponent->SetParameter(TEXT("Turn"), 0.0f);
-				}
-				else
-				{
-					bAnyKeyDown = false;
-
-					UE_LOG(LogTemp, Error, TEXT("PlayTurn"));
-					GameState = ManagerStateV2::PlayTurn;
-					AudioComponent->SetParameter(TEXT("Turn"), 0.0f);
-				}
+				UE_LOG(LogTemp, Error, TEXT("PlayTurn"));
+				GameState = ManagerStateV2::PlayTurn;
+				AudioComponent->SetParameter(TEXT("Turn"), 0.0f);
 				return;
 			}
 			else
@@ -486,7 +512,7 @@ void ANoteManagerV2::Tick(float DeltaTime)
 
 				case 4:
 				{
-					HudWidget->ChangeBreakWidgetVisibility(false);
+					//HudWidget->ChangeBreakWidgetVisibility(false);
 				}
 				break;
 
@@ -497,9 +523,14 @@ void ANoteManagerV2::Tick(float DeltaTime)
 		}
 	}
 
+	else if (GameState == ManagerStateV2::Success)
+	{
+		// 다시 초기 세팅 후 MakeTurn 으로 넘어가기
+	}
+
 	else if (GameState == ManagerStateV2::Fail)
 	{
-
+		// 풉 누구마셔 전달
 	}
 }
 

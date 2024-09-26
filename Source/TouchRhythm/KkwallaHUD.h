@@ -22,7 +22,9 @@ class TOUCHRHYTHM_API AKkwallaHUD : public AHUD
 	virtual void BeginPlay() override;
 
 public:
-	void ChangeBreakWidgetVisibility(bool bShow);
+	void InitSet();
+
+	void ChangeBreakWidgetVisibility(bool bShow, FLinearColor InColorA = FLinearColor::Black, FLinearColor InColorB = FLinearColor::Black);
 	void ShowFailePage(bool bShow);
 	void PlayAnimCount(int32 InCount);
 	

@@ -3,6 +3,34 @@
 
 #include "BreakPage.h"
 #include "Animation/WidgetAnimation.h"
+#include "Components/Image.h"
+#include "Materials/MaterialInterface.h"
+#include "Materials/MaterialInstanceDynamic.h"
+
+
+void UBreakPage::NativeOnInitialized()
+{
+	Super::NativeOnInitialized();
+
+	UMaterialInterface* Mat = Cast<UMaterialInterface>(BGImage->GetBrush().GetResourceObject());
+	if (IsValid(Mat))
+	{
+		MatInst = UMaterialInstanceDynamic::Create(Mat, nullptr, TEXT("MatInst"));
+		BGImage->Brush.SetResourceObject(MatInst);
+	}
+}
+
+void UBreakPage::SetBGColor(FLinearColor InColorA, FLinearColor InColorB)
+{
+	if (IsValid(MatInst))
+	{
+		FVector ColorA = { InColorA.R, InColorA.G, InColorA.B };
+		FVector ColorB = { InColorB.R, InColorB.G, InColorB.B };
+
+		MatInst->SetVectorParameterValue(TEXT("BG A"), ColorA);
+		MatInst->SetVectorParameterValue(TEXT("BG B"), ColorB);
+	}
+}
 
 void UBreakPage::PlayAnimA()
 {
