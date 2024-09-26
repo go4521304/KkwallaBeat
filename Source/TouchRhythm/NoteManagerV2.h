@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "fmod.hpp"
+#include "ManagerInterface.h"
 #include "NoteManagerV2.generated.h"
 
 class ABGActorV2;
@@ -21,7 +22,7 @@ enum class ManagerStateV2
 };
 
 UCLASS()
-class TOUCHRHYTHM_API ANoteManagerV2 : public AActor
+class TOUCHRHYTHM_API ANoteManagerV2 : public AActor, public IManagerInterface
 {
 	GENERATED_BODY()
 	
@@ -37,7 +38,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void TouchInput(const FVector2D& InPos);
+	// IManagerInterface
+	virtual void TouchInput(const FVector2D& InPos) override;
 
 private:
 	UPROPERTY()

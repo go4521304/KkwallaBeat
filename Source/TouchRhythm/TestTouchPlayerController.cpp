@@ -15,6 +15,8 @@
 #include "NoteManagerV2.h"
 #include "EngineUtils.h"
 
+#include "ManagerInterface.h"
+
 ATestTouchPlayerController::ATestTouchPlayerController()
 {
 	SetShowMouseCursor(true);
@@ -66,21 +68,11 @@ void ATestTouchPlayerController::BeginPlay()
 		TouchParticle = TouchParticlePtr.LoadSynchronous();
 	}
 
-	for (ANoteManager* Iter : TActorRange<ANoteManager>(GetWorld()))
+	for (AActor* Iter : TActorRange<AActor>(GetWorld()))
 	{
-		if (IsValid(Iter))
+		if (IsValid(Iter) && Iter->Implements<UManagerInterface>())
 		{
-			NoteManager = Iter;
-			break;
-		}
-	}
-
-	for (ANoteManagerV2* Iter : TActorRange<ANoteManagerV2>(GetWorld()))
-	{
-		if (IsValid(Iter))
-		{
-			NoteManagerV2 = Iter;
-			break;
+			ManagerActor = Iter;
 		}
 	}
 
@@ -112,14 +104,9 @@ void ATestTouchPlayerController::OnClickedTriggered()
 
 	//UE_LOG(LogTemp, Error, TEXT("%f, %f, %f"), HitPos.X, HitPos.Y, HitPos.Z);
 
-	if (IsValid(NoteManager))
+	if (IsValid(ManagerActor.GetObject()))
 	{
-		NoteManager->TouchInput(FVector2D(HitPos));
-	}
-
-	if (IsValid(NoteManagerV2))
-	{
-		NoteManagerV2->TouchInput(FVector2D(HitPos));
+		ManagerActor->TouchInput(FVector2D(HitPos));
 	}
 }
 

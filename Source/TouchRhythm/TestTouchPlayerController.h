@@ -13,10 +13,7 @@
  class UInputMappingContext;
  class UInputAction;
  class UNiagaraSystem;
-
-
- class ANoteManager;
- class ANoteManagerV2;
+ class IManagerInterface;
 
 UCLASS()
 class TOUCHRHYTHM_API ATestTouchPlayerController : public APlayerController
@@ -46,10 +43,7 @@ private:
 	UNiagaraSystem* TouchParticle;
 
 	UPROPERTY()
-	ANoteManager* NoteManager;
-
-	UPROPERTY()
-	ANoteManagerV2* NoteManagerV2;
+	TScriptInterface<IManagerInterface> ManagerActor;
 
 	bool bIsTouch;
 };
