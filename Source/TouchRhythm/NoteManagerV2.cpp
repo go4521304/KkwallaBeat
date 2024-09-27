@@ -48,13 +48,15 @@ void ANoteManagerV2::BeginPlay()
 	LastBeatCheckTime = 0;
 	BeatFlipFlop = false;
 
+	bRestart = false;
+
 	// 시작할 때 입력을 안받겠음
 	bAnyKeyDown = true;
 	OnKeyDownTime = -1;
 	CachePos = FVector2D::ZeroVector;
 
 	// 플레이어 세팅
-	PlayerNum = 5; // (추후 initset 함수로 분리하고 플레이어 수를 입력받도록)
+	PlayerNum = 6; // (추후 initset 함수로 분리하고 플레이어 수를 입력받도록)
 	CurTurnIndex = 0;
 
 	PlayerTurn.Reserve(PlayerNum);
@@ -366,8 +368,11 @@ void ANoteManagerV2::Tick(float DeltaTime)
 
 						UE_LOG(LogTemp, Error, TEXT("Success"));
 						GameState = ManagerStateV2::Success;
-						HudWidget->ShowFailePage(true); // ShowSuceessPage 로 수정 필요
-						AudioComponent->SetParameter(TEXT("Turn"), 0.0f);
+						
+						Restart();
+
+						//HudWidget->ShowFailePage(true); // ShowSuceessPage 로 수정 필요
+						//AudioComponent->SetParameter(TEXT("Turn"), 0.0f);
 						return;
 					}
 
@@ -395,7 +400,8 @@ void ANoteManagerV2::Tick(float DeltaTime)
 
 					UE_LOG(LogTemp, Error, TEXT("Fail"));
 					GameState = ManagerStateV2::Fail;
-					HudWidget->ShowFailePage(true);
+					int32 CurrentPlayer = PlayerTurn[CurTurnIndex - 1];
+					HudWidget->ShowFailePage(true, CurrentPlayer);
 				}
 				return;
 			}
@@ -525,12 +531,121 @@ void ANoteManagerV2::Tick(float DeltaTime)
 
 	else if (GameState == ManagerStateV2::Success)
 	{
+		if ((BeatCount * BPMTimeMs) <= CurTimeSec)
+		{
+			BeatCount++;
+			if (PreBeatCount * 2 < BeatCount)
+			{
+				BeatCount = 0;
+				CurTimeSec = 0;
+
+				OnKeyDownTime = -1;
+				HudWidget->ChangeBreakWidgetVisibility(false);
+
+				bRestart = false;
+				bAnyKeyDown = false;
+
+				UE_LOG(LogTemp, Error, TEXT("MakeTurn"));
+				GameState = ManagerStateV2::MakeTurn;
+				AudioComponent->SetParameter(TEXT("Turn"), 0.0f);
+				return;
+			}
+			else
+			{
+				switch (BeatCount)
+				{
+				case 5:
+				{
+					HudWidget->PlayAnimCount(3);
+				}
+				break;
+
+				case 6:
+				{
+					HudWidget->PlayAnimCount(2);
+				}
+				break;
+
+				case 7:
+				{
+					HudWidget->PlayAnimCount(1);
+				}
+				break;
+
+				case 8:
+				{
+					//HudWidget->ChangeBreakWidgetVisibility(false);
+				}
+				break;
+
+				default:
+					break;
+				}
+			}
+		}
+		// 로딩 페이지에서 색을 정하고 다시 짠하면서 MakeTurn으로 넘기면 될듯
 		// 다시 초기 세팅 후 MakeTurn 으로 넘어가기
 	}
 
 	else if (GameState == ManagerStateV2::Fail)
 	{
-		// 풉 누구마셔 전달
+		if (bRestart == false)
+		{
+			return;
+		}
+
+		if ((BeatCount * BPMTimeMs) <= CurTimeSec)
+		{
+			BeatCount++;
+			if (PreBeatCount < BeatCount)
+			{
+				BeatCount = 0;
+				CurTimeSec = 0;
+
+				OnKeyDownTime = -1;
+				HudWidget->ChangeBreakWidgetVisibility(false);
+
+				bRestart = false;
+				bAnyKeyDown = false;
+
+				UE_LOG(LogTemp, Error, TEXT("MakeTurn"));
+				GameState = ManagerStateV2::MakeTurn;
+				AudioComponent->SetParameter(TEXT("Turn"), 0.0f);
+				return;
+			}
+			else
+			{
+				switch (BeatCount)
+				{
+				case 1:
+				{
+					HudWidget->PlayAnimCount(3);
+				}
+				break;
+
+				case 2:
+				{
+					HudWidget->PlayAnimCount(2);
+				}
+				break;
+
+				case 3:
+				{
+					HudWidget->PlayAnimCount(1);
+				}
+				break;
+
+				case 4:
+				{
+					//HudWidget->ChangeBreakWidgetVisibility(false);
+				}
+				break;
+
+				default:
+					break;
+				}
+			}
+		}
 	}
 }
 
@@ -546,3 +661,48 @@ void ANoteManagerV2::TouchInput(const FVector2D& InPos)
 	CachePos = InPos;
 }
 
+void ANoteManagerV2::Restart()
+{
+	bRestart = true;
+
+	// 설정값 초기화
+	bAnyKeyDown = false;
+	OnKeyDownTime = -1;
+	BeatCount = 0;
+	CurTimeSec = 0;
+	CurTurnIndex = 0;
+
+	PlayerTurn.Reserve(PlayerNum);
+	for (int32 i = 0; i < PlayerNum; ++i)
+	{
+		PlayerTurn.Add(i);
+	}
+	for (int32 i = 0; i < PlayerNum; ++i)
+	{
+		int32 SwapIndex = FMath::RandRange(0, PlayerNum - 1);
+		if (i != SwapIndex)
+		{
+			PlayerTurn.Swap(i, SwapIndex);
+		}
+	}
+
+	for (AKkwalla* CharIter : Kkwallas)
+	{
+		if (IsValid(CharIter))
+		{
+			CharIter->Reset();
+		}
+	}
+
+	for (int32 Iter = 0; Iter < Kkwallas.Num(); ++Iter)
+	{
+		PatternArr[Iter] = -1;
+		PatternArrCheck[Iter] = -1;
+	}
+
+	HudWidget->ShowFailePage(false);
+
+	int32 CurrentPlayer = PlayerTurn[CurTurnIndex];
+	HudWidget->ChangeBreakWidgetVisibility(true, ColorDataAsset->ColorData[CurrentPlayer].ColorA, ColorDataAsset->ColorData[CurrentPlayer].ColorB);
+	AudioComponent->SetParameter(TEXT("Turn"), 1.0f);
+}

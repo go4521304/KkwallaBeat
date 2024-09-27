@@ -24,4 +24,5 @@ class TOUCHRHYTHM_API IManagerInterface
 public:
 
 	virtual void TouchInput(const FVector2D& InPos) = 0;
+	virtual void Restart() = 0;
 };

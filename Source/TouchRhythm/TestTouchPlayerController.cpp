@@ -10,11 +10,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
-
-#include "NoteManager.h"
-#include "NoteManagerV2.h"
 #include "EngineUtils.h"
-
 #include "ManagerInterface.h"
 
 ATestTouchPlayerController::ATestTouchPlayerController()

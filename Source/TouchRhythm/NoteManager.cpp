@@ -468,3 +468,8 @@ void ANoteManager::TouchInput(const FVector2D& InPos)
 	CachePos = InPos;
 }
 
+void ANoteManager::Restart()
+{
+
+}
+

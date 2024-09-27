@@ -7,7 +7,7 @@
 #include "KkwallaHUD.generated.h"
 
 class UBreakPage;
-class UUserWidget;
+class UFailPageWidget;
 
 /**
  * 
@@ -25,7 +25,7 @@ public:
 	void InitSet();
 
 	void ChangeBreakWidgetVisibility(bool bShow, FLinearColor InColorA = FLinearColor::Black, FLinearColor InColorB = FLinearColor::Black);
-	void ShowFailePage(bool bShow);
+	void ShowFailePage(bool bShow, int32 InPlayerNum = 0);
 	void PlayAnimCount(int32 InCount);
 	
 private:
@@ -38,5 +38,5 @@ private:
 	UBreakPage* BreakWidget;
 
 	UPROPERTY()
-	UUserWidget* FailWidget;
+	UFailPageWidget* FailWidget;
 };

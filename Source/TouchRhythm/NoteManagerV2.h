@@ -40,6 +40,7 @@ public:
 
 	// IManagerInterface
 	virtual void TouchInput(const FVector2D& InPos) override;
+	virtual void Restart() override;
 
 private:
 	UPROPERTY()
@@ -85,4 +86,6 @@ private:
 
 	int32 LastBeatCheckTime;
 	bool BeatFlipFlop;
+
+	bool bRestart;
 };

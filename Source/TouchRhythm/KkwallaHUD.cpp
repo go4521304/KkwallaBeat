@@ -4,11 +4,12 @@
 #include "KkwallaHUD.h"
 #include "Blueprint/UserWidget.h"
 #include "BreakPage.h"
+#include "FailPageWidget.h"
 
 AKkwallaHUD::AKkwallaHUD()
 {
 	BreakTimeWidgetAsset = FSoftClassPath(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/GameMake/UMG/UMG_LD_B.UMG_LD_B_C'"));
-	FailWidgetAsset = FSoftClassPath(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/GameMake/UMG/UMG_LD_A.UMG_LD_A_C'"));
+	FailWidgetAsset = FSoftClassPath(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/GameMake/UMG/UMG_Fail.UMG_Fail_C'"));
 }
 
 void AKkwallaHUD::BeginPlay()
@@ -26,7 +27,7 @@ void AKkwallaHUD::InitSet()
 		ChangeBreakWidgetVisibility(false);
 	}
 
-	FailWidget = CreateWidget<UUserWidget>(GetOwningPlayerController(), FailWidgetAsset.LoadSynchronous());
+	FailWidget = CreateWidget<UFailPageWidget>(GetOwningPlayerController(), FailWidgetAsset.LoadSynchronous());
 	if (IsValid(FailWidget))
 	{
 		FailWidget->AddToViewport();
@@ -53,7 +54,7 @@ void AKkwallaHUD::ChangeBreakWidgetVisibility(bool bShow, FLinearColor InColorA 
 	}
 }
 
-void AKkwallaHUD::ShowFailePage(bool bShow)
+void AKkwallaHUD::ShowFailePage(bool bShow, int32 InPlayerNum /*= 0*/)
 {
 	if (IsValid(FailWidget) == false)
 	{
@@ -62,6 +63,7 @@ void AKkwallaHUD::ShowFailePage(bool bShow)
 
 	if (bShow)
 	{
+		FailWidget->SetFailPlayer(InPlayerNum);
 		FailWidget->SetVisibility(ESlateVisibility::Visible);
 	}
 	else
