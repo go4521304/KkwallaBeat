@@ -8,7 +8,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "KkwallaHUD.h"
 
-const int32 MS_TIME = 1000;
 
 // Sets default values
 ANoteManager::ANoteManager()

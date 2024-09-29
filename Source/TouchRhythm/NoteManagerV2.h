@@ -43,6 +43,8 @@ public:
 	virtual void Restart() override;
 
 private:
+	const int32 MS_TIME = 1000;
+
 	UPROPERTY()
 	class UFMODAudioComponent* AudioComponent;
 	
@@ -57,6 +59,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Manager")
 	UFMODEvent* BGMusic;
+
+	UPROPERTY(EditAnywhere, Category = "Manager")
+	int32 BPM;
 
 	UPROPERTY(EditAnywhere, Category = "Manager")
 	int32 PreBeatCount;
@@ -84,8 +89,5 @@ private:
 	UPROPERTY()
 	AKkwallaHUD* HudWidget;
 
-	int32 LastBeatCheckTime;
-	bool BeatFlipFlop;
-
-	bool bRestart;
+	bool bGameStart;
 };

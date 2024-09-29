@@ -16,7 +16,7 @@ void UBreakPage::NativeOnInitialized()
 	if (IsValid(Mat))
 	{
 		MatInst = UMaterialInstanceDynamic::Create(Mat, nullptr, TEXT("MatInst"));
-		BGImage->Brush.SetResourceObject(MatInst);
+		BGImage->SetBrushFromMaterial(MatInst);
 	}
 }
 

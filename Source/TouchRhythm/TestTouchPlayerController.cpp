@@ -96,7 +96,8 @@ void ATestTouchPlayerController::OnClickedTriggered()
 
 	FVector HitPos = Hit.Location;
 
-	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), TouchParticle, HitPos);
+	UNiagaraComponent* TouchEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), TouchParticle, HitPos);
+	TouchEffect->SetTranslucentSortPriority(500);
 
 	//UE_LOG(LogTemp, Error, TEXT("%f, %f, %f"), HitPos.X, HitPos.Y, HitPos.Z);
 

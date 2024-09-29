@@ -9,7 +9,6 @@
 #include "KkwallaHUD.h"
 #include "ColorDataAsset.h"
 
-const int32 MS_TIME = 1000;
 
 // Sets default values
 ANoteManagerV2::ANoteManagerV2()
@@ -40,15 +39,12 @@ void ANoteManagerV2::BeginPlay()
 	Super::BeginPlay();
 
 	AudioComponent->SetEvent(BGMusic);
-	BPMTimeMs = 0;
+	BPMTimeMs = MS_TIME / ((float)BPM / 60);
 	GradeCheck = GradeCheck * (MS_TIME / 1000);
 	BeatCount = 0;
 	GameState = ManagerStateV2::PreBeat;
 
-	LastBeatCheckTime = 0;
-	BeatFlipFlop = false;
-
-	bRestart = false;
+	bGameStart = false;
 
 	// 시작할 때 입력을 안받겠음
 	bAnyKeyDown = true;
@@ -156,12 +152,20 @@ void ANoteManagerV2::Tick(float DeltaTime)
 
 	if (GameState == ManagerStateV2::PreBeat)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Metering: %d channels, %d len.  rms: %.3f  %.3f"), Info.numchannels, Info.numsamples, Info.rmslevel[0], Info.rmslevel[1]);
-		if (PreBeatCount <= BeatCount)
+		if (bGameStart == false)
 		{
-			BPMTimeMs /= BeatCount;
-			BPMTimeMs += 30; // 측정값에 수동으로 30ms 추가해줌 (조금 빠르게 측정이 되고있음)
+			if (Info.rmslevel[0] > 0.0f)
+			{
+				bGameStart = true;
+				BeatCount = 0;
+				CurTimeSec = 0;
+			}
+			return;
+		}
 
+		UE_LOG(LogTemp, Error, TEXT("Metering: %d channels, %d len.  rms: %.3f  %.3f"), Info.numchannels, Info.numsamples, Info.rmslevel[0], Info.rmslevel[1]);
+		if (((PreBeatCount - 1) * BPMTimeMs) <= CurTimeSec)
+		{
 			bAnyKeyDown = false;
 			OnKeyDownTime = -1;
 			BeatCount = 0;
@@ -178,23 +182,6 @@ void ANoteManagerV2::Tick(float DeltaTime)
 			HudWidget->ChangeBreakWidgetVisibility(false);
 			HudWidget->ShowFailePage(false);
 			AudioComponent->SetParameter(TEXT("Turn"), 0.0f);
-		}
-		else
-		{
-			if (BeatFlipFlop == false && Info.rmslevel[0] >= 0.02f)
-			{
-				BPMTimeMs += CurTimeSec - LastBeatCheckTime;
-				LastBeatCheckTime = CurTimeSec;
-
-				BeatCount++;
-				BeatFlipFlop = true;
-
-				UE_LOG(LogTemp, Error, TEXT("MakeTurn"));
-			}
-			else if (BeatFlipFlop && Info.rmslevel[0] < 0.01f)
-			{
-				BeatFlipFlop = false;
-			}
 		}
 	}
 
@@ -542,7 +529,7 @@ void ANoteManagerV2::Tick(float DeltaTime)
 				OnKeyDownTime = -1;
 				HudWidget->ChangeBreakWidgetVisibility(false);
 
-				bRestart = false;
+				bGameStart = false;
 				bAnyKeyDown = false;
 
 				UE_LOG(LogTemp, Error, TEXT("MakeTurn"));
@@ -589,7 +576,7 @@ void ANoteManagerV2::Tick(float DeltaTime)
 
 	else if (GameState == ManagerStateV2::Fail)
 	{
-		if (bRestart == false)
+		if (bGameStart == false)
 		{
 			return;
 		}
@@ -605,7 +592,7 @@ void ANoteManagerV2::Tick(float DeltaTime)
 				OnKeyDownTime = -1;
 				HudWidget->ChangeBreakWidgetVisibility(false);
 
-				bRestart = false;
+				bGameStart = false;
 				bAnyKeyDown = false;
 
 				UE_LOG(LogTemp, Error, TEXT("MakeTurn"));
@@ -663,7 +650,7 @@ void ANoteManagerV2::TouchInput(const FVector2D& InPos)
 
 void ANoteManagerV2::Restart()
 {
-	bRestart = true;
+	bGameStart = true;
 
 	// 설정값 초기화
 	bAnyKeyDown = false;

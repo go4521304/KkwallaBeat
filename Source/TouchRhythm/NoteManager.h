@@ -40,6 +40,8 @@ public:
 	virtual void Restart() override;
 
 private:
+	const int32 MS_TIME = 1000;
+
 	UPROPERTY()
 	class UFMODAudioComponent* AudioComponent;
 	

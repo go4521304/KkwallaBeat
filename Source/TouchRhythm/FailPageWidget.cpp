@@ -17,7 +17,7 @@ void UFailPageWidget::NativeOnInitialized()
 	if (IsValid(Mat))
 	{
 		FailMatInst = UMaterialInstanceDynamic::Create(Mat, nullptr, TEXT("MatInst"));
-		Img_fail->Brush.SetResourceObject(FailMatInst);
+		Img_fail->SetBrushFromMaterial(FailMatInst);
 	}
 
 	Btn_Re->OnClicked.AddDynamic(this, &ThisClass::RetryGame);
