@@ -103,7 +103,7 @@ void ATestTouchPlayerController::OnClickedTriggered()
 
 	if (IsValid(ManagerActor.GetObject()))
 	{
-		ManagerActor->TouchInput(FVector2D(HitPos));
+		ManagerActor->TouchInput(HitPos);
 	}
 }
 

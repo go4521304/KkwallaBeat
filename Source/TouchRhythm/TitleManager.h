@@ -7,6 +7,9 @@
 #include "ManagerInterface.h"
 #include "TitleManager.generated.h"
 
+class ATitleHUD;
+class UFMODAudioComponent;
+class UFMODEvent;
 class AStaticMeshActor;
 class ULevelSequence;
 
@@ -28,10 +31,18 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	// IManagerInterface
-	virtual void TouchInput(const FVector2D& InPos) override;
+	virtual void TouchInput(const FVector& InPos) override;
 	virtual void Restart() override;
 
 private:
+	bool bPlayingCredit;
+
+	UPROPERTY()
+	ATitleHUD* HudWidget;
+
+	UPROPERTY()
+	UFMODAudioComponent* AudioComponent;
+
 	UPROPERTY(EditAnywhere, Category = "Manager")
 	AStaticMeshActor* Btn_Start;
 
@@ -40,4 +51,10 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Manager")
 	ULevelSequence* TitleSequence;
+
+	UPROPERTY(EditAnywhere, Category = "Manager")
+	UFMODEvent* BGMusic;
+
+	UPROPERTY(EditAnywhere, Category = "Manager")
+	UFMODEvent* TransitionGame;
 };

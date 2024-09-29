@@ -36,7 +36,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	// IManagerInterface
-	virtual void TouchInput(const FVector2D& InPos) override;
+	virtual void TouchInput(const FVector& InPos) override;
 	virtual void Restart() override;
 
 private:

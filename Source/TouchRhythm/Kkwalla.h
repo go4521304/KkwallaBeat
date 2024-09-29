@@ -8,6 +8,7 @@
 
 class UPaperSprite;
 class UPaperSpriteComponent;
+class UFMODEvent;
 
 UENUM()
 enum class EKkwallaState
@@ -49,4 +50,7 @@ private:
 	TArray<UPaperSprite*> CharaSprite;
 
 	int32 CurSpriteIndex;
+
+	UPROPERTY(EditAnywhere, Category = "ReadySFX")
+	UFMODEvent* SFXClick;
 };

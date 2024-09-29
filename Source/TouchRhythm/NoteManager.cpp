@@ -7,6 +7,7 @@
 #include "FMODBlueprintStatics.h"
 #include "Kismet/GameplayStatics.h"
 #include "KkwallaHUD.h"
+#include "FMODEvent.h"
 
 
 // Sets default values
@@ -455,7 +456,7 @@ void ANoteManager::Tick(float DeltaTime)
 	}
 }
 
-void ANoteManager::TouchInput(const FVector2D& InPos)
+void ANoteManager::TouchInput(const FVector& InPos)
 {
 	if (bAnyKeyDown)
 	{
@@ -464,7 +465,7 @@ void ANoteManager::TouchInput(const FVector2D& InPos)
 	UE_LOG(LogTemp, Error, TEXT("%d"), CurTimeSec);
 	bAnyKeyDown = true;
 	OnKeyDownTime = CurTimeSec;
-	CachePos = InPos;
+	CachePos = FVector2D(InPos);
 }
 
 void ANoteManager::Restart()

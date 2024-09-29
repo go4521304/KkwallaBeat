@@ -4,6 +4,8 @@
 #include "Kkwalla.h"
 #include "PaperSpriteComponent.h"
 #include "PaperSprite.h"
+#include "FMODBlueprintStatics.h"
+#include "FMODEvent.h"
 
 // Sets default values
 AKkwalla::AKkwalla()
@@ -117,6 +119,10 @@ bool AKkwalla::PointCheck(FVector2D InPos)
 void AKkwalla::BeerReady()
 {
 	Chara->SetSprite(CharaSprite[2]);
+	if (CharaState != EKkwallaState::Ready)
+	{
+		UFMODBlueprintStatics::PlayEvent2D(GetWorld(), SFXClick, true);
+	}
 	CharaState = EKkwallaState::Ready;
 }
 

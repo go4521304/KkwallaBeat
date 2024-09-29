@@ -8,6 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "KkwallaHUD.h"
 #include "ColorDataAsset.h"
+#include "FMODEvent.h"
 
 
 // Sets default values
@@ -355,7 +356,7 @@ void ANoteManagerV2::Tick(float DeltaTime)
 
 						UE_LOG(LogTemp, Error, TEXT("Success"));
 						GameState = ManagerStateV2::Success;
-						
+						UFMODBlueprintStatics::PlayEvent2D(GetWorld(), SFXSuccess, true);
 						Restart();
 
 						//HudWidget->ShowFailePage(true); // ShowSuceessPage 로 수정 필요
@@ -389,6 +390,7 @@ void ANoteManagerV2::Tick(float DeltaTime)
 					GameState = ManagerStateV2::Fail;
 					int32 CurrentPlayer = PlayerTurn[CurTurnIndex - 1];
 					HudWidget->ShowFailePage(true, CurrentPlayer);
+					UFMODBlueprintStatics::PlayEvent2D(GetWorld(), SFXFail, true);
 				}
 				return;
 			}
@@ -636,7 +638,7 @@ void ANoteManagerV2::Tick(float DeltaTime)
 	}
 }
 
-void ANoteManagerV2::TouchInput(const FVector2D& InPos)
+void ANoteManagerV2::TouchInput(const FVector& InPos)
 {
 	if (bAnyKeyDown)
 	{
@@ -645,7 +647,7 @@ void ANoteManagerV2::TouchInput(const FVector2D& InPos)
 	UE_LOG(LogTemp, Error, TEXT("%d"), CurTimeSec);
 	bAnyKeyDown = true;
 	OnKeyDownTime = CurTimeSec;
-	CachePos = InPos;
+	CachePos = FVector2D(InPos);
 }
 
 void ANoteManagerV2::Restart()

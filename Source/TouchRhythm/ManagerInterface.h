@@ -23,6 +23,6 @@ class TOUCHRHYTHM_API IManagerInterface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
-	virtual void TouchInput(const FVector2D& InPos) = 0;
+	virtual void TouchInput(const FVector& InPos) = 0;
 	virtual void Restart() = 0;
 };
