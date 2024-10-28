@@ -165,7 +165,7 @@ void ANoteManagerV2::Tick(float DeltaTime)
 		}
 
 		UE_LOG(LogTemp, Error, TEXT("Metering: %d channels, %d len.  rms: %.3f  %.3f"), Info.numchannels, Info.numsamples, Info.rmslevel[0], Info.rmslevel[1]);
-		if (((PreBeatCount - 1) * BPMTimeMs) <= CurTimeSec)
+		if ((3 * BPMTimeMs) <= CurTimeSec + 10)
 		{
 			bAnyKeyDown = false;
 			OnKeyDownTime = -1;
@@ -188,7 +188,7 @@ void ANoteManagerV2::Tick(float DeltaTime)
 
 	else if (GameState == ManagerStateV2::MakeTurn)
 	{
-		if ((BeatCount * BPMTimeMs) <= CurTimeSec)
+		if ((BeatCount * BPMTimeMs) <= CurTimeSec + 10)
 		{
 			UE_LOG(LogTemp, Error, TEXT("BeatCount %d"), CurTimeSec);
 			BeatCount++;
@@ -199,6 +199,8 @@ void ANoteManagerV2::Tick(float DeltaTime)
 				CurTimeSec = 0;
 				CurTurnIndex++;
 				//PlayerNum = 5; // 이걸 플레이할 사람 수
+
+				bGameStart = false;
 
 				bAnyKeyDown = true;
 				OnKeyDownTime = -1;
@@ -268,10 +270,10 @@ void ANoteManagerV2::Tick(float DeltaTime)
 
 	else if (GameState == ManagerStateV2::MakeTurnBreak)
 	{
-		if ((BeatCount * BPMTimeMs) <= CurTimeSec)
+		if ((BeatCount * BPMTimeMs) <= CurTimeSec + 10)
 		{
 			BeatCount++;
-			if (PreBeatCount < BeatCount)
+			if (8 < BeatCount)
 			{
 				BeatCount = 0;
 				CurTimeSec = 0;
@@ -290,27 +292,27 @@ void ANoteManagerV2::Tick(float DeltaTime)
 			{
 				switch (BeatCount)
 				{
-				case 1:
+				case 5:
 				{
 					HudWidget->PlayAnimCount(3);
 				}
 				break;
 
-				case 2:
+				case 6:
 				{
 					HudWidget->PlayAnimCount(2);
 				}
 				break;
 
-				case 3:
+				case 7:
 				{
 					HudWidget->PlayAnimCount(1);
 				}
 				break;
 
-				case 4:
+				case 8:
 				{
-					//HudWidget->ChangeBreakWidgetVisibility(false);
+					HudWidget->PlayAnimCount(4);
 				}
 				break;
 
@@ -323,7 +325,7 @@ void ANoteManagerV2::Tick(float DeltaTime)
 
 	else if (GameState == ManagerStateV2::PlayTurn)
 	{
-		if ((BeatCount * BPMTimeMs) <= CurTimeSec)
+		if ((BeatCount * BPMTimeMs) <= CurTimeSec + 10)
 		{
 			UE_LOG(LogTemp, Error, TEXT("BeatCount %d"), CurTimeSec);
 			BeatCount++;
@@ -465,10 +467,10 @@ void ANoteManagerV2::Tick(float DeltaTime)
 
 	else if (GameState == ManagerStateV2::PlayTurnBreak)
 	{
-		if ((BeatCount * BPMTimeMs) <= CurTimeSec)
+		if ((BeatCount * BPMTimeMs) <= CurTimeSec + 10)
 		{
 			BeatCount++;
-			if (PreBeatCount < BeatCount)
+			if (8 < BeatCount)
 			{
 				BeatCount = 0;
 				CurTimeSec = 0;
@@ -487,27 +489,27 @@ void ANoteManagerV2::Tick(float DeltaTime)
 			{
 				switch (BeatCount)
 				{
-				case 1:
+				case 5:
 				{
 					HudWidget->PlayAnimCount(3);
 				}
 				break;
 
-				case 2:
+				case 6:
 				{
 					HudWidget->PlayAnimCount(2);
 				}
 				break;
 
-				case 3:
+				case 7:
 				{
 					HudWidget->PlayAnimCount(1);
 				}
 				break;
 
-				case 4:
+				case 8:
 				{
-					//HudWidget->ChangeBreakWidgetVisibility(false);
+					HudWidget->PlayAnimCount(4);
 				}
 				break;
 
@@ -520,10 +522,10 @@ void ANoteManagerV2::Tick(float DeltaTime)
 
 	else if (GameState == ManagerStateV2::Success)
 	{
-		if ((BeatCount * BPMTimeMs) <= CurTimeSec)
+		if ((BeatCount * BPMTimeMs) <= CurTimeSec + 10)
 		{
 			BeatCount++;
-			if (PreBeatCount * 2 < BeatCount)
+			if (8 < BeatCount)
 			{
 				BeatCount = 0;
 				CurTimeSec = 0;
@@ -563,7 +565,7 @@ void ANoteManagerV2::Tick(float DeltaTime)
 
 				case 8:
 				{
-					//HudWidget->ChangeBreakWidgetVisibility(false);
+					HudWidget->PlayAnimCount(4);
 				}
 				break;
 
@@ -583,10 +585,10 @@ void ANoteManagerV2::Tick(float DeltaTime)
 			return;
 		}
 
-		if ((BeatCount * BPMTimeMs) <= CurTimeSec)
+		if ((BeatCount * BPMTimeMs) <= CurTimeSec + 10)
 		{
 			BeatCount++;
-			if (PreBeatCount < BeatCount)
+			if (8 < BeatCount)
 			{
 				BeatCount = 0;
 				CurTimeSec = 0;
@@ -606,27 +608,27 @@ void ANoteManagerV2::Tick(float DeltaTime)
 			{
 				switch (BeatCount)
 				{
-				case 1:
+				case 5:
 				{
 					HudWidget->PlayAnimCount(3);
 				}
 				break;
 
-				case 2:
+				case 6:
 				{
 					HudWidget->PlayAnimCount(2);
 				}
 				break;
 
-				case 3:
+				case 7:
 				{
 					HudWidget->PlayAnimCount(1);
 				}
 				break;
 
-				case 4:
+				case 8:
 				{
-					//HudWidget->ChangeBreakWidgetVisibility(false);
+					HudWidget->PlayAnimCount(4);
 				}
 				break;
 

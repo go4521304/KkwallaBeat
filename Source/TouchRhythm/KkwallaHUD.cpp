@@ -85,6 +85,9 @@ void AKkwallaHUD::PlayAnimCount(int32 InCount)
 	case 3:
 		BreakWidget->PlayAnimCount3();
 	break;
+	case 4:
+		BreakWidget->PlayCount_Go();
+	break;
 	default:
 		break;
 	}

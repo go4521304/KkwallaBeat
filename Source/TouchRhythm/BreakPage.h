@@ -25,6 +25,8 @@ class TOUCHRHYTHM_API UBreakPage : public UUserWidget
 	class UWidgetAnimation* Count2;
 	UPROPERTY(Transient, meta = (BindWidgetAnim))
 	class UWidgetAnimation* Count3;
+	UPROPERTY(Transient, meta = (BindWidgetAnim))
+	class UWidgetAnimation* Count_Go;
 
 	UPROPERTY()
 	class UMaterialInstanceDynamic* MatInst;
@@ -37,4 +39,5 @@ public:
 	void PlayAnimCount1();
 	void PlayAnimCount2();
 	void PlayAnimCount3();
+	void PlayCount_Go();
 };

@@ -67,3 +67,12 @@ void UBreakPage::PlayAnimCount3()
 		UE_LOG(LogTemp, Warning, TEXT("3"));
 	}
 }
+
+void UBreakPage::PlayCount_Go()
+{
+	if (IsValid(Count_Go))
+	{
+		PlayAnimation(Count_Go);
+		UE_LOG(LogTemp, Warning, TEXT("Go"));
+	}
+}
