@@ -19,20 +19,20 @@ void AKkwallaHUD::BeginPlay()
 
 void AKkwallaHUD::InitSet()
 {
-	UUserWidget* CreatedWidget = CreateWidget<UUserWidget>(GetOwningPlayerController(), BreakTimeWidgetAsset.LoadSynchronous());
-	BreakWidget = Cast<UBreakPage>(CreatedWidget);
-	if (IsValid(BreakWidget))
+	if (IsValid(BreakWidget) == false)
 	{
-		BreakWidget->AddToViewport();
-		ChangeBreakWidgetVisibility(false);
+		UUserWidget* CreatedWidget = CreateWidget<UUserWidget>(GetOwningPlayerController(), BreakTimeWidgetAsset.LoadSynchronous());
+		BreakWidget = Cast<UBreakPage>(CreatedWidget);
 	}
+	BreakWidget->AddToViewport();
+	ChangeBreakWidgetVisibility(false);
 
-	FailWidget = CreateWidget<UFailPageWidget>(GetOwningPlayerController(), FailWidgetAsset.LoadSynchronous());
-	if (IsValid(FailWidget))
+	if (IsValid(FailWidget) == false)
 	{
-		FailWidget->AddToViewport();
-		ShowFailePage(false);
+		FailWidget = CreateWidget<UFailPageWidget>(GetOwningPlayerController(), FailWidgetAsset.LoadSynchronous());
 	}
+	FailWidget->AddToViewport();
+	ShowFailePage(false);
 }
 
 void AKkwallaHUD::ChangeBreakWidgetVisibility(bool bShow, FLinearColor InColorA /*= FLinearColor::Black*/, FLinearColor InColorB /*= FLinearColor::Black*/)

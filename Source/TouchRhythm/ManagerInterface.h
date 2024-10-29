@@ -25,4 +25,5 @@ public:
 
 	virtual void TouchInput(const FVector& InPos) = 0;
 	virtual void Restart() = 0;
+	virtual void SetPlayerNum(const int32 InPlayerNum);
 };
