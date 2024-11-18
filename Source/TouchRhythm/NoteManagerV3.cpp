@@ -109,16 +109,19 @@ void ANoteManagerV3::Tick(float DeltaTime)
 	{
 		if (4 * BPMTimeMs <= CurTimeSec)
 		{
+			UE_LOG(LogTemp, Error, TEXT("@@@@@@"));
 			BeatCount = 0;
-			CurTimeSec = 0;
+			CurTimeSec -= 4 * BPMTimeMs;
 			bAnyKeyDown = false;
 			OnKeyDownTime = -1;
 			AudioComponent->SetParameter(TEXT("Turn"), 0.0f);
 			HudWidget->ChangeBreakWidgetVisibility(false);
 			GameState = ManagerStateV3::MakeTurn;
+			return;
 		}
 		else if ((BeatCount * BPMTimeMs) <= CurTimeSec)
 		{
+			UE_LOG(LogTemp, Error, TEXT("@@@"));
 			switch (BeatCount)
 			{
 			case 0:
@@ -145,12 +148,13 @@ void ANoteManagerV3::Tick(float DeltaTime)
 		// 생성 턴이 끝났을 때
 		if (8 * BPMTimeMs <= CurTimeSec)
 		{
+			UE_LOG(LogTemp, Error, TEXT("TTT"));
 			for (AKkwalla* Kkwalla : Kkwallas)
 			{
 				Kkwalla->Reset();
 			}
 			BeatCount = 0;
-			CurTimeSec = 0;
+			CurTimeSec -= 8 * BPMTimeMs;
 			// 쉬는 동안 입력을 막음
 			bAnyKeyDown = true;
 			OnKeyDownTime = -1;
@@ -164,6 +168,13 @@ void ANoteManagerV3::Tick(float DeltaTime)
 		}
 		else if ((BeatCount * BPMTimeMs) <= CurTimeSec)
 		{
+			UE_LOG(LogTemp, Error, TEXT("!!!"));
+
+			for (AKkwalla* kkwalla : Kkwallas)
+			{
+				kkwalla->Update();
+			}
+
 			if (BeatCount == 6)
 			{
 				for (int32 i = 0; i < Kkwallas.Num(); ++i)
@@ -217,6 +228,7 @@ void ANoteManagerV3::Tick(float DeltaTime)
 		// 생성 턴이 끝났을 때
 		if (8 * BPMTimeMs <= CurTimeSec)
 		{
+			UE_LOG(LogTemp, Error, TEXT("TTT"));
 			for (AKkwalla* Kkwalla : Kkwallas)
 			{
 				Kkwalla->Reset();
@@ -224,7 +236,7 @@ void ANoteManagerV3::Tick(float DeltaTime)
 			NoteEntered.Init(-1, 6);
 
 			BeatCount = 0;
-			CurTimeSec = 0;
+			CurTimeSec -= 8 * BPMTimeMs;
 			// 쉬는 동안 입력을 막음
 			bAnyKeyDown = true;
 			OnKeyDownTime = -1;
@@ -238,6 +250,13 @@ void ANoteManagerV3::Tick(float DeltaTime)
 		}
 		else if ((BeatCount * BPMTimeMs) <= CurTimeSec)
 		{
+			UE_LOG(LogTemp, Error, TEXT("!!!"));
+
+			for (AKkwalla* kkwalla : Kkwallas)
+			{
+				kkwalla->Update();
+			}
+
 			if (BeatCount == 6)
 			{
 				for (int32 i = 0; i < Kkwallas.Num(); ++i)
@@ -313,16 +332,19 @@ void ANoteManagerV3::Tick(float DeltaTime)
 		// 쉬는 턴은 8번
 		if (8 * BPMTimeMs <= CurTimeSec)
 		{
+			UE_LOG(LogTemp, Error, TEXT("333"));
 			BeatCount = 0;
-			CurTimeSec = 0;
+			CurTimeSec -= 8 * BPMTimeMs;
 			bAnyKeyDown = false;
 			OnKeyDownTime = -1;
 			AudioComponent->SetParameter(TEXT("Turn"), 0.0f);
 			HudWidget->ChangeBreakWidgetVisibility(false);
 			GameState = ManagerStateV3::PlayTurn;
+			return;
 		}
 		else if ((BeatCount * BPMTimeMs) <= CurTimeSec)
 		{
+			UE_LOG(LogTemp, Error, TEXT("222"));
 			switch (BeatCount)
 			{
 			case 4:
@@ -340,7 +362,6 @@ void ANoteManagerV3::Tick(float DeltaTime)
 			default:
 				break;
 			}
-
 			BeatCount++;
 		}
 	}
@@ -434,7 +455,7 @@ void ANoteManagerV3::InitManager()
 		{
 			PlayerTurnArr.Add(-1);
 		}
-		PlayerTurnArr[i] = i;
+		PlayerTurnArr[i] = i; 
 	}
 	CurTurnIndex = 0;
 
